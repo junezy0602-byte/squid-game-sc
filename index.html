@@ -1556,8 +1556,8 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      mix-blend-mode: multiply;
-      filter: saturate(1.18) contrast(1.12);
+      mix-blend-mode: normal;
+      filter: saturate(1.08) contrast(1.06);
     }
 
     .photo-actor::before,
@@ -1728,14 +1728,17 @@
     .mission-panel.idle-panel {
       opacity: 1;
       pointer-events: auto;
+      width: min(520px, calc(100% - 36px));
     }
 
+    .mission-panel.idle-panel .mission-status,
     .mission-panel.idle-panel .mission-card,
     .mission-panel.idle-panel .door-choices,
     .mission-panel.idle-panel .mission-feedback {
       display: none;
     }
 
+    .mission-panel.playing-panel .mission-status,
     .mission-panel.playing-panel .mission-card,
     .mission-panel.playing-panel .door-choices,
     .mission-panel.playing-panel .mission-feedback {
@@ -1747,11 +1750,9 @@
     }
 
     .mission-status {
-      position: absolute;
-      left: 50%;
-      top: -454px;
-      width: min(430px, 100%);
-      transform: translateX(-50%);
+      position: static;
+      width: 100%;
+      transform: none;
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
@@ -1795,12 +1796,11 @@
     }
 
     #missionStartBtn {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      width: min(520px, calc(100% - 36px));
-      transform: translateX(-50%);
+      position: static;
+      width: 100%;
+      transform: none;
       z-index: 21;
+      min-height: 58px;
     }
 
     .mission-arena.watching + .mission-panel #missionStartBtn {
@@ -1979,14 +1979,18 @@
       }
 
       .mission-panel {
-        left: 10px;
-        right: 10px;
-        bottom: 98px;
+        left: 50%;
+        right: auto;
+        bottom: 24px;
+        width: min(520px, calc(100% - 20px));
+        transform: translateX(-50%);
         grid-template-columns: 1fr;
       }
 
       .mission-status {
-        top: -74px;
+        position: static;
+        width: 100%;
+        transform: none;
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
@@ -2127,7 +2131,7 @@
             <div class="mission-layout">
               <div class="mission-arena" id="missionArena">
                 <div class="finish-line">FINISH</div>
-                <video class="stage-video" id="redLightVideo" muted playsinline preload="auto">
+                <video class="stage-video" id="redLightVideo" muted playsinline preload="auto" poster="assets/doll.png">
                   <source src="assets/red-light.mp4" type="video/mp4">
                 </video>
                 <div class="video-fallback" id="redLightFallback">红灯阶段：娃娃正在看你</div>
@@ -2259,11 +2263,11 @@
 
   <div class="intro-overlay" id="introOverlay">
     <div class="intro-card">
-      <video id="introVideo" autoplay muted playsinline preload="auto" controls>
+      <video id="introVideo" autoplay muted playsinline preload="auto" controls poster="assets/doll.png">
         <source src="assets/intro.mp4" type="video/mp4">
       </video>
       <div class="intro-fallback">
-        开场影片在这个浏览器里不能播放。可以直接进入游戏；如果你给我 MP4/H.264 版本，我可以换成稳定播放。
+        开场影片在这个浏览器里不能播放或正在黑屏。可以直接进入游戏；请把影片重新导出成 H.264 MP4 后再上传。
       </div>
       <div class="intro-actions">
         <div>
@@ -2613,6 +2617,7 @@
       const video = el("redLightVideo");
       const fallback = el("redLightFallback");
       if (!video) return;
+      fallback.classList.remove("show");
       video.currentTime = 0;
       const playPromise = video.play();
       if (playPromise) {
@@ -2620,6 +2625,11 @@
           .then(() => fallback.classList.remove("show"))
           .catch(() => fallback.classList.add("show"));
       }
+      setTimeout(() => {
+        if (!video.paused && video.currentTime < 0.08) {
+          fallback.classList.add("show");
+        }
+      }, 1500);
     }
 
     function triggerRedFlash() {
@@ -3090,6 +3100,11 @@
           document.querySelector(".intro-card").classList.add("video-error");
         });
       }
+      setTimeout(() => {
+        if (!video.paused && video.currentTime < 0.08) {
+          document.querySelector(".intro-card").classList.add("video-error");
+        }
+      }, 1500);
     });
 
     el("skipIntroBtn").addEventListener("click", () => {
@@ -3107,6 +3122,11 @@
       if (playPromise) {
         playPromise.catch(() => {});
       }
+      setTimeout(() => {
+        if (!video.paused && video.currentTime < 0.08) {
+          document.querySelector(".intro-card").classList.add("video-error");
+        }
+      }, 1800);
     });
     el("soundToggle").addEventListener("click", toggleMusic);
     el("resetBtn").addEventListener("click", resetMode);

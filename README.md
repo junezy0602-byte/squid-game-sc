@@ -42,3 +42,14 @@ GitHub will give you a website link after deployment.
 ## Audio Note
 
 Modern browsers block autoplay with sound. The intro video can autoplay only when muted. To play intro sound and BGM, the player must click `打开声音 + BGM`.
+
+## Video Note
+
+For GitHub Pages and Chrome/Safari, videos should be real H.264 MP4 files. Renaming a `.MOV` file to `.mp4` is not enough. If the video is black or stuck at `0:00`, re-export it as:
+
+- Format: MP4
+- Video codec: H.264 / AVC
+- Audio codec: AAC
+- Resolution: 720p or 1080p
+
+Tools such as HandBrake, CapCut export, iMovie export, or CloudConvert can do this.
