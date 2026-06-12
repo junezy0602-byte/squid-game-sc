@@ -1,0 +1,3127 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Y4 科学实验格式小游戏</title>
+  <style>
+    :root {
+      --bg: #07151d;
+      --ink: #16242b;
+      --muted: #607985;
+      --line: #d5e3e8;
+      --panel: #ffffff;
+      --blue: #ff477e;
+      --blue-dark: #d92f66;
+      --green: #19a974;
+      --red: #e43f5a;
+      --yellow: #f7c948;
+      --aqua: #d9fff5;
+      --sky: #e8fff8;
+      --pink: #ff477e;
+      --mint: #27e0a3;
+      --deep: #07151d;
+      --guard: #ef3d67;
+      --track: #16785f;
+      --shadow: 0 18px 38px rgba(0, 0, 0, 0.24);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 71, 126, 0.32), transparent 26%),
+        radial-gradient(circle at 88% 10%, rgba(39, 224, 163, 0.2), transparent 24%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+        var(--bg);
+      background-size: 28px 28px;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      background: rgba(7, 21, 29, 0.9);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--pink), #ff7aa5);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      box-shadow: 0 8px 16px rgba(255, 71, 126, 0.28);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(20px, 3vw, 32px);
+      line-height: 1.1;
+      color: white;
+    }
+
+    .subtitle {
+      margin-top: 3px;
+      color: #b9d5d2;
+      font-size: 14px;
+    }
+
+    .scoreboard {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      min-height: 34px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 34px;
+    }
+
+    .arena {
+      position: relative;
+      overflow: hidden;
+      min-height: 260px;
+      margin-bottom: 18px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 1px) 0 0 / 100% 52px,
+        linear-gradient(90deg, rgba(255, 255, 255, 0.12), transparent 1px) 0 0 / 52px 100%,
+        linear-gradient(145deg, #102836 0%, #163748 46%, #0c1f2b 100%);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.85fr);
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .arena::before,
+    .arena::after {
+      content: "";
+      position: absolute;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .arena::before {
+      left: -120px;
+      bottom: -210px;
+      background: rgba(255, 71, 126, 0.22);
+    }
+
+    .arena::after {
+      right: -100px;
+      top: -190px;
+      background: rgba(39, 224, 163, 0.16);
+    }
+
+    .arena-copy {
+      position: relative;
+      z-index: 1;
+      padding: clamp(22px, 4vw, 42px);
+      color: white;
+      display: grid;
+      align-content: center;
+      gap: 12px;
+    }
+
+    .arena-kicker {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255, 71, 126, 0.2);
+      border: 1px solid rgba(255, 122, 165, 0.44);
+      color: #ffd6e3;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+
+    .arena h2 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 56px);
+      line-height: 1.02;
+      color: white;
+    }
+
+    .arena p {
+      margin: 0;
+      max-width: 620px;
+      color: #d4ecea;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .symbol-strip {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .symbol {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.72);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 25px;
+      font-weight: 900;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .arena-scene {
+      position: relative;
+      min-height: 260px;
+      z-index: 1;
+    }
+
+    .arena-floor {
+      position: absolute;
+      left: 4%;
+      right: 4%;
+      bottom: 0;
+      height: 48%;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(39, 224, 163, 0.2), rgba(255, 71, 126, 0.16));
+      background-size: 34px 34px, 34px 34px, auto;
+      clip-path: polygon(9% 0, 91% 0, 100% 100%, 0% 100%);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+    }
+
+    .character {
+      position: absolute;
+      bottom: 34px;
+      width: 116px;
+      height: 176px;
+    }
+
+    .character.guard {
+      right: 58%;
+      transform: translateX(50%);
+    }
+
+    .character.player {
+      right: 13%;
+      transform: scale(0.92);
+    }
+
+    .head {
+      position: absolute;
+      left: 33px;
+      top: 0;
+      width: 52px;
+      height: 58px;
+      border-radius: 24px 24px 20px 20px;
+      background: #111820;
+      border: 3px solid rgba(255, 255, 255, 0.12);
+      z-index: 3;
+    }
+
+    .guard .head::before,
+    .guard .head::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .guard .head::before {
+      width: 24px;
+      height: 24px;
+      border: 3px solid white;
+      clip-path: polygon(50% 0, 100% 88%, 0 88%);
+    }
+
+    .guard .head::after {
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      display: none;
+    }
+
+    .player .head {
+      background: #f0c2a4;
+      border-color: rgba(22, 120, 95, 0.3);
+    }
+
+    .player .head::before {
+      content: "";
+      position: absolute;
+      left: 13px;
+      top: 18px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #14242c;
+      box-shadow: 19px 0 0 #14242c;
+    }
+
+    .player .head::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      bottom: 13px;
+      width: 20px;
+      height: 7px;
+      border-bottom: 3px solid #14242c;
+      border-radius: 50%;
+    }
+
+    .body {
+      position: absolute;
+      left: 20px;
+      top: 52px;
+      width: 76px;
+      height: 94px;
+      border-radius: 26px 26px 12px 12px;
+      background: var(--guard);
+      z-index: 2;
+      box-shadow: inset 0 -16px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    .player .body {
+      background: var(--track);
+    }
+
+    .body::before {
+      content: "";
+      position: absolute;
+      left: 33px;
+      top: 10px;
+      width: 4px;
+      height: 78px;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .player .body::after {
+      content: "Y4";
+      position: absolute;
+      right: 11px;
+      top: 17px;
+      width: 30px;
+      height: 23px;
+      border-radius: 5px;
+      background: white;
+      color: var(--track);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .arm,
+    .leg {
+      position: absolute;
+      background: inherit;
+      border-radius: 999px;
+    }
+
+    .arm {
+      top: 62px;
+      width: 22px;
+      height: 74px;
+      z-index: 1;
+    }
+
+    .arm.left {
+      left: 7px;
+      transform: rotate(11deg);
+    }
+
+    .arm.right {
+      right: 7px;
+      transform: rotate(-11deg);
+    }
+
+    .guard .arm {
+      background: var(--guard);
+    }
+
+    .player .arm {
+      background: var(--track);
+    }
+
+    .leg {
+      top: 132px;
+      width: 25px;
+      height: 48px;
+      background: var(--guard);
+    }
+
+    .player .leg {
+      background: var(--track);
+    }
+
+    .leg.left {
+      left: 31px;
+    }
+
+    .leg.right {
+      right: 31px;
+    }
+
+    .wall-symbols {
+      position: absolute;
+      right: 8%;
+      top: 18px;
+      display: grid;
+      gap: 8px;
+      opacity: 0.72;
+    }
+
+    .wall-symbols span {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(255, 255, 255, 0.55);
+      border-radius: 7px;
+      color: white;
+      font-weight: 900;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .tab {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.17);
+      color: white;
+      font-weight: 800;
+    }
+
+    .tab.active {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: white;
+    }
+
+    .game-shell {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .game-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(255, 71, 126, 0.13), rgba(39, 224, 163, 0.13)),
+        white;
+    }
+
+    .game-title {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .game-note {
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: var(--pink);
+      color: white;
+      font-weight: 900;
+      box-shadow: 0 8px 16px rgba(255, 71, 126, 0.22);
+    }
+
+    .btn:hover {
+      background: var(--blue-dark);
+    }
+
+    .btn.secondary {
+      background: #fff0f6;
+      color: var(--ink);
+      box-shadow: none;
+      border: 1px solid #ffc2d6;
+    }
+
+    .content {
+      padding: 18px;
+    }
+
+    .mode {
+      display: none;
+    }
+
+    .mode.active {
+      display: block;
+    }
+
+    .mission-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .mission-arena {
+      position: relative;
+      min-height: 520px;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 2px solid #123342;
+      background:
+        radial-gradient(circle at 24% 14%, rgba(255, 71, 126, 0.25), transparent 26%),
+        radial-gradient(circle at 86% 20%, rgba(39, 224, 163, 0.18), transparent 25%),
+        linear-gradient(180deg, #183d4f 0%, #0c1f2b 66%, #07151d 100%);
+      box-shadow: inset 0 -80px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .mission-arena::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+    }
+
+    .mission-arena.alarm {
+      animation: alarmFlash 0.32s linear 2;
+    }
+
+    .mission-arena.looking-away {
+      box-shadow: inset 0 -80px 0 rgba(39, 224, 163, 0.18);
+    }
+
+    .mission-arena.watching {
+      box-shadow: inset 0 -80px 0 rgba(228, 63, 90, 0.32), 0 0 0 3px rgba(228, 63, 90, 0.22);
+    }
+
+    .mission-arena.flash-red {
+      animation: stageShock 0.44s ease;
+    }
+
+    @keyframes alarmFlash {
+      0%, 100% { box-shadow: inset 0 -80px 0 rgba(0, 0, 0, 0.18); }
+      50% { box-shadow: inset 0 -80px 0 rgba(228, 63, 90, 0.55); }
+    }
+
+    @keyframes stageShock {
+      0%, 100% { transform: translateX(0); }
+      18% { transform: translateX(-8px); }
+      36% { transform: translateX(8px); }
+      54% { transform: translateX(-5px); }
+      72% { transform: translateX(5px); }
+    }
+
+    .finish-line {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      width: 120px;
+      height: 64px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      border: 2px solid rgba(255, 255, 255, 0.72);
+      background:
+        linear-gradient(45deg, #ffffff 25%, transparent 25% 50%, #ffffff 50% 75%, transparent 75%) 0 0 / 24px 24px,
+        rgba(255, 71, 126, 0.8);
+      text-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .track-path {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 38px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .phase-banner {
+      position: absolute;
+      left: 24px;
+      top: 22px;
+      z-index: 5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(7, 21, 29, 0.74);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: clamp(20px, 3vw, 34px);
+      font-weight: 900;
+      min-width: 220px;
+      text-align: center;
+    }
+
+    .phase-banner.safe {
+      color: #b8ffe9;
+      border-color: rgba(39, 224, 163, 0.48);
+    }
+
+    .phase-banner.danger {
+      color: #ffd4dd;
+      border-color: rgba(255, 71, 126, 0.6);
+      animation: blinkText 0.42s linear infinite alternate;
+    }
+
+    @keyframes blinkText {
+      from { opacity: 0.72; }
+      to { opacity: 1; }
+    }
+
+    .gate {
+      min-height: 86px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.08);
+      color: #d8f7f0;
+      padding: 10px;
+      display: grid;
+      align-content: end;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gate::before {
+      content: attr(data-step);
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.14);
+      color: white;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .gate.done {
+      background: rgba(39, 224, 163, 0.22);
+      border-color: rgba(39, 224, 163, 0.72);
+      color: white;
+    }
+
+    .gate.current {
+      background: rgba(255, 71, 126, 0.28);
+      border-color: #ff7aa5;
+      animation: pulseGate 1.1s ease-in-out infinite;
+    }
+
+    @keyframes pulseGate {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .gate-title {
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .runner {
+      position: absolute;
+      z-index: 4;
+      width: 74px;
+      height: 108px;
+      left: var(--runner-x, 46px);
+      top: var(--runner-y, 304px);
+      transition: left 0.38s ease, top 0.38s ease, transform 0.18s ease;
+    }
+
+    .runner.jump {
+      transform: translateY(-18px);
+    }
+
+    .runner .head {
+      left: 22px;
+      width: 32px;
+      height: 34px;
+      border-radius: 16px 16px 13px 13px;
+    }
+
+    .runner .body {
+      left: 13px;
+      top: 30px;
+      width: 48px;
+      height: 58px;
+      border-radius: 18px 18px 8px 8px;
+      background: var(--track);
+    }
+
+    .runner .body::before {
+      left: 23px;
+      height: 46px;
+    }
+
+    .runner .body::after {
+      content: "Y4";
+      right: 7px;
+      top: 10px;
+      width: 22px;
+      height: 18px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    .runner .arm {
+      top: 39px;
+      width: 13px;
+      height: 44px;
+      background: var(--track);
+    }
+
+    .runner .arm.left {
+      left: 7px;
+    }
+
+    .runner .arm.right {
+      right: 7px;
+    }
+
+    .runner .leg {
+      top: 80px;
+      width: 15px;
+      height: 29px;
+      background: var(--track);
+    }
+
+    .runner .leg.left {
+      left: 22px;
+    }
+
+    .runner .leg.right {
+      right: 22px;
+    }
+
+    .doll-post {
+      position: absolute;
+      right: 34px;
+      top: 58px;
+      width: 186px;
+      height: 318px;
+      z-index: 3;
+      perspective: 800px;
+    }
+
+    .doll {
+      position: absolute;
+      inset: 0;
+    }
+
+    .doll-head {
+      position: absolute;
+      left: 42px;
+      top: 0;
+      width: 104px;
+      height: 116px;
+      border-radius: 44px 44px 38px 38px;
+      background: #f3c3a3;
+      border: 4px solid #32241f;
+      transform-origin: center 58px;
+      transition: transform 0.46s ease;
+      z-index: 4;
+      box-shadow: inset 0 -14px 0 rgba(117, 67, 48, 0.12);
+    }
+
+    .mission-arena.looking-away .doll-head {
+      transform: rotateY(180deg);
+    }
+
+    .doll-hair {
+      position: absolute;
+      left: -3px;
+      right: -3px;
+      top: -5px;
+      height: 45px;
+      border-radius: 44px 44px 8px 8px;
+      background: #39251f;
+    }
+
+    .doll-hair::before,
+    .doll-hair::after {
+      content: "";
+      position: absolute;
+      top: 28px;
+      width: 22px;
+      height: 66px;
+      border-radius: 999px;
+      background: #39251f;
+    }
+
+    .doll-hair::before {
+      left: -11px;
+      transform: rotate(10deg);
+    }
+
+    .doll-hair::after {
+      right: -11px;
+      transform: rotate(-10deg);
+    }
+
+    .doll-eye {
+      position: absolute;
+      top: 54px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #1b1b1b;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .doll-eye.left {
+      left: 32px;
+    }
+
+    .doll-eye.right {
+      right: 32px;
+    }
+
+    .mission-arena.watching .doll-eye {
+      background: #ff164d;
+      box-shadow: 0 0 14px #ff164d, 0 0 28px rgba(255, 22, 77, 0.7);
+      transform: scale(1.28);
+    }
+
+    .doll-mouth {
+      position: absolute;
+      left: 39px;
+      top: 78px;
+      width: 28px;
+      height: 10px;
+      border-bottom: 4px solid #8b3f46;
+      border-radius: 50%;
+    }
+
+    .doll-neck {
+      position: absolute;
+      left: 78px;
+      top: 108px;
+      width: 31px;
+      height: 34px;
+      background: #dfaa8d;
+      z-index: 2;
+    }
+
+    .doll-body {
+      position: absolute;
+      left: 38px;
+      top: 128px;
+      width: 112px;
+      height: 148px;
+      border-radius: 34px 34px 14px 14px;
+      background: #f2a245;
+      border: 4px solid #2f6f68;
+      z-index: 2;
+      box-shadow: inset 0 -28px 0 rgba(0, 0, 0, 0.08);
+    }
+
+    .doll-body::before {
+      content: "";
+      position: absolute;
+      inset: 0 23px auto;
+      height: 72px;
+      background: #ffd071;
+      clip-path: polygon(50% 100%, 0 0, 100% 0);
+    }
+
+    .doll-arm {
+      position: absolute;
+      top: 144px;
+      width: 28px;
+      height: 118px;
+      border-radius: 999px;
+      background: #f3c3a3;
+      border: 3px solid #2f6f68;
+      z-index: 1;
+    }
+
+    .doll-arm.left {
+      left: 24px;
+      transform: rotate(11deg);
+    }
+
+    .doll-arm.right {
+      right: 24px;
+      transform: rotate(-11deg);
+    }
+
+    .doll-leg {
+      position: absolute;
+      top: 264px;
+      width: 31px;
+      height: 56px;
+      border-radius: 999px 999px 8px 8px;
+      background: #f3c3a3;
+      z-index: 1;
+    }
+
+    .doll-leg.left {
+      left: 60px;
+    }
+
+    .doll-leg.right {
+      right: 60px;
+    }
+
+    .mission-panel {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .mission-status {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .status-tile {
+      padding: 12px;
+      border-radius: 8px;
+      background: #f7fffc;
+      border: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    .status-tile span {
+      display: block;
+      margin-top: 4px;
+      font-size: 22px;
+      color: var(--pink);
+    }
+
+    .mission-card {
+      border-radius: 8px;
+      border: 2px solid #ffc2d6;
+      background:
+        linear-gradient(135deg, rgba(255, 71, 126, 0.12), rgba(39, 224, 163, 0.1)),
+        white;
+      padding: 16px;
+    }
+
+    .mission-label {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #0c1f2b;
+      color: white;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .mission-question {
+      font-size: clamp(22px, 3.2vw, 32px);
+      line-height: 1.25;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .mission-hint {
+      color: var(--muted);
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .door-choices {
+      display: grid;
+      gap: 10px;
+    }
+
+    .door-choice {
+      position: relative;
+      text-align: left;
+      padding: 16px 16px 16px 48px;
+      min-height: 72px;
+      border-radius: 8px;
+      border: 2px solid #d7e5f2;
+      background: white;
+      color: var(--ink);
+      font-weight: 900;
+      line-height: 1.35;
+      box-shadow: 0 5px 12px rgba(24, 50, 74, 0.08);
+    }
+
+    .door-choice::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      width: 20px;
+      height: 20px;
+      transform: translateY(-50%);
+      border: 3px solid var(--pink);
+      border-radius: 50%;
+    }
+
+    .door-choice:nth-child(2)::before {
+      border-radius: 0;
+      clip-path: polygon(50% 0, 100% 90%, 0 90%);
+      border-radius: 0;
+    }
+
+    .door-choice:nth-child(3)::before {
+      border-radius: 2px;
+    }
+
+    .door-choice:hover {
+      border-color: var(--pink);
+      transform: translateY(-1px);
+    }
+
+    .door-choice.correct {
+      border-color: var(--green);
+      background: #e8fbf2;
+    }
+
+    .door-choice.wrong {
+      border-color: var(--red);
+      background: #fff0f0;
+    }
+
+    .mission-feedback {
+      min-height: 38px;
+      padding: 11px 13px;
+      border-radius: 8px;
+      background: #f7fffc;
+      border: 1px solid var(--line);
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .mission-feedback.good {
+      color: var(--green);
+      border-color: #a8e7c9;
+      background: #edfff6;
+    }
+
+    .mission-feedback.bad {
+      color: var(--red);
+      border-color: #ffb6c4;
+      background: #fff2f5;
+    }
+
+    .mission-over {
+      position: absolute;
+      inset: 18px;
+      z-index: 8;
+      border-radius: 8px;
+      background: rgba(7, 21, 29, 0.88);
+      color: white;
+      display: none;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .mission-over.show {
+      display: grid;
+    }
+
+    .mission-over h3 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 4vw, 46px);
+      color: white;
+    }
+
+    .mission-over p {
+      margin: 0;
+      color: #d4ecea;
+      font-weight: 800;
+    }
+
+    .match-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: 16px;
+    }
+
+    .column-title {
+      font-weight: 900;
+      margin: 0 0 10px;
+      color: var(--muted);
+    }
+
+    .card-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .card {
+      width: 100%;
+      text-align: left;
+      padding: 14px;
+      min-height: 64px;
+      border-radius: 8px;
+      border: 2px solid var(--line);
+      background: white;
+      color: var(--ink);
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(24, 50, 74, 0.06);
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 2px;
+    }
+
+    .card:hover {
+      transform: translateY(-1px);
+      border-color: #ff9bbc;
+    }
+
+    .card.selected {
+      border-color: var(--yellow);
+      background: #fff5cf;
+    }
+
+    .card.correct {
+      border-color: var(--green);
+      background: #e8fbf2;
+      color: #145a3b;
+      cursor: default;
+    }
+
+    .card.wrong {
+      border-color: var(--red);
+      animation: shake 0.24s linear;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .feedback {
+      margin-top: 14px;
+      min-height: 28px;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .feedback.good {
+      color: var(--green);
+    }
+
+    .feedback.bad {
+      color: var(--red);
+    }
+
+    .sort-area {
+      display: grid;
+      gap: 10px;
+      max-width: 760px;
+    }
+
+    .sort-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 2px solid var(--line);
+      background: white;
+      box-shadow: 0 4px 12px rgba(24, 50, 74, 0.06);
+    }
+
+    .sort-index {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #fff0f6;
+      color: var(--pink);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .sort-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #fff0f6;
+      border: 1px solid #ffc2d6;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .quiz-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 290px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .question-box {
+      background:
+        linear-gradient(135deg, rgba(39, 224, 163, 0.18), rgba(255, 71, 126, 0.14)),
+        var(--aqua);
+      border: 1px solid #9fe8d5;
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 136px;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .question-label {
+      color: #216b5b;
+      font-weight: 900;
+    }
+
+    .question-text {
+      font-size: clamp(22px, 4vw, 34px);
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .choice {
+      text-align: left;
+      padding: 14px;
+      border-radius: 8px;
+      background: white;
+      border: 2px solid var(--line);
+      color: var(--ink);
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .choice.correct {
+      background: #e8fbf2;
+      border-color: var(--green);
+    }
+
+    .choice.wrong {
+      background: #fff0f0;
+      border-color: var(--red);
+    }
+
+    .progress-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .meter {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #e8eef5;
+      margin: 10px 0 14px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--mint), var(--pink));
+      transition: width 0.2s ease;
+    }
+
+    .fact-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .fact {
+      padding: 10px;
+      border-radius: 8px;
+      background: #f7fffc;
+      border: 1px solid var(--line);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .teacher-panel {
+      margin-top: 18px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      line-height: 1.35;
+    }
+
+    .mini-card b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .celebration {
+      position: fixed;
+      inset: auto 18px 18px auto;
+      max-width: min(360px, calc(100% - 36px));
+      padding: 14px 16px;
+      border-radius: 8px;
+      background: #0c1f2b;
+      color: white;
+      box-shadow: var(--shadow);
+      font-weight: 900;
+      transform: translateY(120%);
+      transition: transform 0.25s ease;
+      z-index: 20;
+    }
+
+    .celebration.show {
+      transform: translateY(0);
+    }
+
+    /* Full-stage game mode overrides */
+    .arena {
+      display: none;
+    }
+
+    .tabs {
+      margin-bottom: 10px;
+    }
+
+    .game-shell {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .game-head {
+      border-radius: 8px 8px 0 0;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(7, 21, 29, 0.82);
+      color: white;
+    }
+
+    .game-head .game-note {
+      color: #b9d5d2;
+    }
+
+    .content {
+      padding: 0;
+    }
+
+    #missionMode {
+      position: relative;
+    }
+
+    .mission-layout {
+      display: block;
+      position: relative;
+    }
+
+    .mission-arena {
+      min-height: clamp(620px, calc(100vh - 235px), 820px);
+      border-radius: 0 0 8px 8px;
+      border-color: rgba(255, 255, 255, 0.16);
+      background:
+        radial-gradient(circle at 50% 22%, rgba(255, 236, 179, 0.22), transparent 25%),
+        linear-gradient(180deg, #172c3b 0%, #122633 46%, #0b171f 100%);
+      perspective: 1100px;
+      transform-style: preserve-3d;
+    }
+
+    .mission-arena::after {
+      content: "";
+      position: absolute;
+      left: 2%;
+      right: 2%;
+      bottom: 0;
+      height: 44%;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(49, 91, 94, 0.68), rgba(19, 38, 48, 0.95));
+      background-size: 42px 42px;
+      clip-path: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .stage-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 0;
+      filter: saturate(1.15) contrast(1.05) brightness(0.82);
+    }
+
+    .red-flash {
+      position: absolute;
+      inset: 0;
+      z-index: 7;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.42), transparent 16%),
+        linear-gradient(90deg, rgba(255, 0, 64, 0.68), rgba(255, 31, 86, 0.18), rgba(255, 0, 64, 0.68));
+      opacity: 0;
+      mix-blend-mode: screen;
+    }
+
+    .red-flash.active {
+      animation: redFlashBurst 0.72s steps(2, end);
+    }
+
+    @keyframes redFlashBurst {
+      0% { opacity: 0; }
+      12% { opacity: 0.95; }
+      26% { opacity: 0.12; }
+      44% { opacity: 0.78; }
+      62% { opacity: 0.08; }
+      80% { opacity: 0.5; }
+      100% { opacity: 0; }
+    }
+
+    .video-fallback {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.78);
+      font-weight: 900;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 71, 126, 0.22), transparent 24%),
+        linear-gradient(180deg, rgba(16, 40, 54, 0.8), rgba(7, 21, 29, 0.88));
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+
+    .video-fallback.show {
+      opacity: 1;
+    }
+
+    .mission-arena.watching .stage-video {
+      opacity: 0.42;
+    }
+
+    .stage-characters {
+      position: absolute;
+      inset: 74px 20px 170px;
+      z-index: 3;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+
+    .doll-post {
+      display: none;
+    }
+
+    .photo-actor {
+      position: absolute;
+      bottom: 0;
+      transform-style: preserve-3d;
+      filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.38));
+      transition: transform 0.45s ease, filter 0.25s ease;
+      user-select: none;
+      isolation: isolate;
+    }
+
+    .mission-arena.looking-away .photo-actor {
+      animation: actorIdle 2.4s ease-in-out infinite;
+    }
+
+    @keyframes actorIdle {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 0 -6px; }
+    }
+
+    .photo-actor img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+      filter: saturate(1.18) contrast(1.12);
+    }
+
+    .photo-actor::before,
+    .photo-actor::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      z-index: -1;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(255, 71, 126, 0.28), rgba(39, 224, 163, 0.16));
+      transform: translateZ(-34px) translate(15px, 16px) skewY(-2deg);
+      filter: blur(2px);
+      opacity: 0.85;
+    }
+
+    .photo-actor::after {
+      inset: 18px;
+      transform: translateZ(-64px) translate(30px, 30px) skewY(-3deg);
+      opacity: 0.42;
+    }
+
+    .real-doll {
+      left: 50%;
+      width: min(43vw, 390px);
+      height: min(56vw, 440px);
+      transform: translateX(-50%) rotateY(180deg) rotateX(2deg) translateZ(80px);
+      z-index: 4;
+      overflow: hidden;
+      clip-path: inset(0 30% 0 30%);
+    }
+
+    .real-doll img {
+      width: 250%;
+      max-width: none;
+      transform: translateX(-30%);
+    }
+
+    .mission-arena.watching .real-doll {
+      transform: translateX(-50%) rotateY(0deg) rotateX(2deg) translateZ(128px) scale(1.08);
+      filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.42)) drop-shadow(0 0 24px rgba(255, 22, 77, 0.28));
+      animation: dollSnap 0.5s cubic-bezier(.18, .89, .32, 1.28);
+    }
+
+    @keyframes dollSnap {
+      0% { transform: translateX(-50%) rotateY(180deg) rotateX(2deg) translateZ(80px) scale(1); }
+      62% { transform: translateX(-50%) rotateY(-14deg) rotateX(2deg) translateZ(138px) scale(1.1); }
+      100% { transform: translateX(-50%) rotateY(0deg) rotateX(2deg) translateZ(128px) scale(1.08); }
+    }
+
+    .real-guard {
+      width: min(23vw, 210px);
+      height: min(49vw, 340px);
+      z-index: 2;
+      opacity: 0.92;
+    }
+
+    .real-guard.left {
+      left: 8%;
+      transform: rotateY(28deg) rotateX(2deg) translateZ(-50px);
+    }
+
+    .real-guard.right {
+      right: 8%;
+      transform: rotateY(-28deg) rotateX(2deg) translateZ(-50px);
+    }
+
+    .eye-beam {
+      position: absolute;
+      left: 50%;
+      top: 26%;
+      width: 260px;
+      height: 112px;
+      transform: translateX(-50%);
+      opacity: 0;
+      z-index: 5;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 42% 42%, rgba(255, 20, 76, 0.95) 0 8px, rgba(255, 20, 76, 0.26) 9px 30px, transparent 31px),
+        radial-gradient(circle at 58% 42%, rgba(255, 20, 76, 0.95) 0 8px, rgba(255, 20, 76, 0.26) 9px 30px, transparent 31px),
+        linear-gradient(90deg, transparent, rgba(255, 20, 76, 0.28), transparent);
+      filter: blur(0.2px);
+    }
+
+    .mission-arena.watching .eye-beam {
+      opacity: 1;
+      animation: scanPulse 0.5s linear infinite alternate;
+    }
+
+    @keyframes scanPulse {
+      from { transform: translateX(-50%) scaleX(0.92); }
+      to { transform: translateX(-50%) scaleX(1.08); }
+    }
+
+    .phase-banner {
+      left: 50%;
+      top: 18px;
+      min-width: min(520px, calc(100% - 40px));
+      transform: translateX(-50%);
+      font-size: clamp(28px, 4.8vw, 58px);
+      padding: 12px 18px;
+      z-index: 8;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.48);
+    }
+
+    .finish-line {
+      top: auto;
+      right: 28px;
+      bottom: 152px;
+      z-index: 4;
+    }
+
+    .runner {
+      z-index: 6;
+      filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.34));
+      animation: runnerBreathe 1.8s ease-in-out infinite;
+    }
+
+    @keyframes runnerBreathe {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 0 -4px; }
+    }
+
+    .track-path {
+      left: 28px;
+      right: 28px;
+      bottom: 26px;
+      grid-template-columns: repeat(8, minmax(76px, 1fr));
+      gap: 8px;
+      z-index: 6;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .gate {
+      min-height: 76px;
+      backdrop-filter: blur(7px);
+      background: rgba(7, 21, 29, 0.42);
+    }
+
+    .gate-title {
+      font-size: clamp(12px, 1.3vw, 16px);
+    }
+
+    .mission-panel {
+      position: absolute;
+      left: 50%;
+      right: auto;
+      bottom: 28px;
+      width: min(980px, calc(100% - 36px));
+      transform: translateX(-50%);
+      z-index: 9;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .mission-arena.watching + .mission-panel,
+    .mission-panel.force-show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .mission-panel.idle-panel {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mission-panel.idle-panel .mission-card,
+    .mission-panel.idle-panel .door-choices,
+    .mission-panel.idle-panel .mission-feedback {
+      display: none;
+    }
+
+    .mission-panel.playing-panel .mission-card,
+    .mission-panel.playing-panel .door-choices,
+    .mission-panel.playing-panel .mission-feedback {
+      display: none;
+    }
+
+    .mission-panel.playing-panel #missionStartBtn {
+      display: none;
+    }
+
+    .mission-status {
+      position: absolute;
+      left: 50%;
+      top: -454px;
+      width: min(430px, 100%);
+      transform: translateX(-50%);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .status-tile {
+      text-align: center;
+      padding: 8px 10px;
+    }
+
+    .status-tile,
+    .mission-card,
+    .mission-feedback,
+    .door-choice {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+    }
+
+    .mission-card {
+      min-height: 118px;
+      text-align: center;
+    }
+
+    .mission-question {
+      font-size: clamp(28px, 3.8vw, 52px);
+    }
+
+    .door-choices {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .door-choice {
+      min-height: 86px;
+      display: flex;
+      align-items: center;
+      padding: 16px 16px 16px 50px;
+      font-size: clamp(15px, 1.5vw, 20px);
+    }
+
+    #missionStartBtn,
+    .mission-feedback {
+      grid-column: 1 / -1;
+    }
+
+    #missionStartBtn {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      width: min(520px, calc(100% - 36px));
+      transform: translateX(-50%);
+      z-index: 21;
+    }
+
+    .mission-arena.watching + .mission-panel #missionStartBtn {
+      display: none;
+    }
+
+    .intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255, 71, 126, 0.22), transparent 32%),
+        rgba(7, 21, 29, 0.94);
+    }
+
+    .intro-overlay.hidden {
+      display: none;
+    }
+
+    .intro-card {
+      width: min(980px, 100%);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #07151d;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+      color: white;
+    }
+
+    .intro-card video {
+      width: 100%;
+      max-height: 62vh;
+      display: block;
+      background: black;
+      object-fit: cover;
+    }
+
+    .intro-fallback {
+      display: none;
+      padding: 28px;
+      min-height: 260px;
+      place-items: center;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255, 71, 126, 0.28), transparent 30%),
+        #0c1f2b;
+      font-weight: 900;
+      color: #d4ecea;
+    }
+
+    .intro-card.video-error video {
+      display: none;
+    }
+
+    .intro-card.video-error .intro-fallback {
+      display: grid;
+    }
+
+    .intro-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.06);
+      position: relative;
+      z-index: 2;
+    }
+
+    .intro-actions strong {
+      font-size: 20px;
+    }
+
+    .sound-toggle {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 30;
+      min-height: 42px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(7, 21, 29, 0.82);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-weight: 900;
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 840px) {
+      .topbar-inner,
+      .game-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .scoreboard,
+      .controls {
+        justify-content: flex-start;
+      }
+
+      .match-grid,
+      .mission-layout,
+      .quiz-layout,
+      .teacher-panel,
+      .arena {
+        grid-template-columns: 1fr;
+      }
+
+      .mission-arena {
+        min-height: 500px;
+      }
+
+      .mission-status {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .track-path {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .arena-scene {
+        min-height: 220px;
+      }
+
+      .character.guard {
+        left: 15%;
+        right: auto;
+        transform: scale(0.86);
+      }
+
+      .character.player {
+        right: 12%;
+        transform: scale(0.78);
+      }
+
+      main {
+        width: min(100% - 18px, 1180px);
+        padding-top: 10px;
+      }
+
+      .mission-arena {
+        min-height: 760px;
+      }
+
+      .stage-characters {
+        inset: 86px 8px 300px;
+      }
+
+      .real-doll {
+        width: 300px;
+        height: 350px;
+      }
+
+      .real-guard {
+        width: 130px;
+        height: 250px;
+        opacity: 0.78;
+      }
+
+      .real-guard.left {
+        left: -4%;
+      }
+
+      .real-guard.right {
+        right: -4%;
+      }
+
+      .phase-banner {
+        top: 12px;
+        min-width: calc(100% - 24px);
+        font-size: clamp(25px, 8vw, 40px);
+      }
+
+      .mission-panel {
+        left: 10px;
+        right: 10px;
+        bottom: 98px;
+        grid-template-columns: 1fr;
+      }
+
+      .mission-status {
+        top: -74px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .status-tile {
+        padding: 9px;
+        font-size: 13px;
+      }
+
+      .status-tile span {
+        font-size: 18px;
+      }
+
+      .mission-card {
+        min-height: 118px;
+        padding: 13px;
+      }
+
+      .mission-question {
+        font-size: 30px;
+      }
+
+      .door-choices {
+        grid-template-columns: 1fr;
+      }
+
+      .door-choice {
+        min-height: 62px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+
+      .track-path {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        left: 10px;
+        right: 10px;
+        bottom: 12px;
+      }
+
+      .gate {
+        min-height: 58px;
+        padding: 8px;
+      }
+
+      .finish-line {
+        right: 12px;
+        bottom: 298px;
+        width: 92px;
+        height: 48px;
+      }
+
+      .intro-overlay {
+        padding: 10px;
+      }
+
+      .intro-actions {
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-badge">Y4</div>
+          <div>
+            <h1>科学格式生存挑战</h1>
+            <div class="subtitle">鱿鱼游戏风格主题：背熟目的、变数、假设、结论、推断和观察</div>
+          </div>
+        </div>
+        <div class="scoreboard" aria-live="polite">
+          <div class="pill">分数：<span id="score">0</span></div>
+          <div class="pill">星星：<span id="stars">0</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="arena" aria-label="主题背景">
+        <div class="arena-copy">
+          <div class="arena-kicker">Y4 SCIENCE FORMAT GAME</div>
+          <h2>答对格式，继续前进</h2>
+          <p>学生每完成一轮配对、排序或快问快答，就像通过一个记忆关卡。目标很简单：把科学实验格式背到可以马上说出来。</p>
+          <div class="symbol-strip" aria-hidden="true">
+            <div class="symbol">○</div>
+            <div class="symbol">△</div>
+            <div class="symbol">□</div>
+          </div>
+        </div>
+        <div class="arena-scene" aria-hidden="true">
+          <div class="wall-symbols">
+            <span>○</span>
+            <span>△</span>
+            <span>□</span>
+          </div>
+          <div class="arena-floor"></div>
+          <div class="character guard">
+            <div class="head"></div>
+            <div class="body"></div>
+            <div class="arm left"></div>
+            <div class="arm right"></div>
+            <div class="leg left"></div>
+            <div class="leg right"></div>
+          </div>
+          <div class="character player">
+            <div class="head"></div>
+            <div class="body"></div>
+            <div class="arm left"></div>
+            <div class="arm right"></div>
+            <div class="leg left"></div>
+            <div class="leg right"></div>
+          </div>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="游戏模式">
+        <button class="tab active" data-mode="mission">一二三木头人</button>
+        <button class="tab" data-mode="match">配对记忆</button>
+        <button class="tab" data-mode="sort">格式排序</button>
+        <button class="tab" data-mode="quiz">快问快答</button>
+      </nav>
+
+      <section class="game-shell">
+        <div class="game-head">
+          <div>
+            <div class="game-title" id="modeTitle">一二三木头人</div>
+            <div class="game-note" id="modeNote">娃娃背过去念口令；转回来眼睛发亮时，快点选出正确科学格式。</div>
+          </div>
+          <div class="controls">
+            <button class="btn secondary" id="studyBtn">看格式表</button>
+            <button class="btn" id="resetBtn">重来</button>
+          </div>
+        </div>
+
+        <div class="content">
+          <section class="mode active" id="missionMode">
+            <div class="mission-layout">
+              <div class="mission-arena" id="missionArena">
+                <div class="finish-line">FINISH</div>
+                <video class="stage-video" id="redLightVideo" muted playsinline preload="auto">
+                  <source src="assets/red-light.mp4" type="video/mp4">
+                </video>
+                <div class="video-fallback" id="redLightFallback">红灯阶段：娃娃正在看你</div>
+                <div class="red-flash" id="redFlash"></div>
+                <div class="phase-banner safe" id="phaseBanner">准备开始</div>
+                <div class="stage-characters" aria-hidden="true">
+                  <div class="photo-actor real-guard left">
+                    <img src="assets/squid-game-gamer.png" alt="">
+                  </div>
+                  <div class="photo-actor real-doll" id="realDoll">
+                    <img src="assets/doll.png" alt="">
+                    <div class="eye-beam"></div>
+                  </div>
+                  <div class="photo-actor real-guard right">
+                    <img src="assets/squid-game-gamer.png" alt="">
+                  </div>
+                </div>
+                <div class="doll-post" aria-hidden="true">
+                  <div class="doll">
+                    <div class="doll-head">
+                      <div class="doll-hair"></div>
+                      <div class="doll-eye left"></div>
+                      <div class="doll-eye right"></div>
+                      <div class="doll-mouth"></div>
+                    </div>
+                    <div class="doll-neck"></div>
+                    <div class="doll-body"></div>
+                    <div class="doll-arm left"></div>
+                    <div class="doll-arm right"></div>
+                    <div class="doll-leg left"></div>
+                    <div class="doll-leg right"></div>
+                  </div>
+                </div>
+                <div class="runner player" id="runner">
+                  <div class="head"></div>
+                  <div class="body"></div>
+                  <div class="arm left"></div>
+                  <div class="arm right"></div>
+                  <div class="leg left"></div>
+                  <div class="leg right"></div>
+                </div>
+                <div class="track-path" id="trackPath"></div>
+                <div class="mission-over" id="missionOver">
+                  <div>
+                    <h3 id="missionOverTitle">成功通关！</h3>
+                    <p id="missionOverText">你已经完成所有科学格式关卡。</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mission-panel">
+                <div class="mission-status">
+                  <div class="status-tile">回合 <span id="missionLevel">1 / 8</span></div>
+                  <div class="status-tile">星星 <span id="missionLives">★ ★ ★</span></div>
+                  <div class="status-tile">秒数 <span id="missionTime">8</span></div>
+                </div>
+
+                <div class="mission-card">
+                  <div class="mission-label" id="missionLabel">等待娃娃转头</div>
+                  <div class="mission-question" id="missionQuestion">目的</div>
+                  <div class="mission-hint" id="missionHint">娃娃背过去时准备，转回来才可以回答。</div>
+                </div>
+
+                <div class="door-choices" id="missionChoices"></div>
+                <div class="mission-feedback" id="missionFeedback">按下开始，娃娃会先背过去念“一二三木头人”。</div>
+                <button class="btn" id="missionStartBtn">开始游戏</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="mode" id="matchMode">
+            <div class="match-grid">
+              <div>
+                <p class="column-title">题目</p>
+                <div class="card-list" id="termCards"></div>
+              </div>
+              <div>
+                <p class="column-title">答案格式</p>
+                <div class="card-list" id="answerCards"></div>
+              </div>
+            </div>
+            <div class="feedback" id="matchFeedback">先选左边，再选右边。</div>
+          </section>
+
+          <section class="mode" id="sortMode">
+            <div class="sort-area" id="sortArea"></div>
+            <div class="feedback" id="sortFeedback">把科学实验格式排成正确顺序。</div>
+          </section>
+
+          <section class="mode" id="quizMode">
+            <div class="quiz-layout">
+              <div>
+                <div class="question-box">
+                  <div class="question-label" id="quizCount">第 1 题</div>
+                  <div class="question-text" id="quizQuestion">题目</div>
+                </div>
+                <div class="choices" id="choices"></div>
+                <div class="feedback" id="quizFeedback">选一个答案。</div>
+              </div>
+              <aside class="progress-card">
+                <b>快问快答进度</b>
+                <div class="meter" aria-label="进度">
+                  <div class="meter-fill" id="quizMeter"></div>
+                </div>
+                <div>答对：<b id="quizCorrect">0</b> / <span id="quizTotal">0</span></div>
+                <div class="fact-list">
+                  <div class="fact"><b>口诀 1</b>目的：为了研究操与反之间的关系</div>
+                  <div class="fact"><b>口诀 2</b>操纵性变数不同，反应性变数观察，固定性变数一样</div>
+                  <div class="fact"><b>口诀 3</b>假设和结论常用：操越……反越……</div>
+                </div>
+              </aside>
+            </div>
+          </section>
+
+          <section class="teacher-panel" id="studyPanel" hidden>
+            <div class="mini-card"><b>1. 目的</b>为了研究操与反之间的关系</div>
+            <div class="mini-card"><b>2. 操纵性定义</b>我们可以根据反来确定操</div>
+            <div class="mini-card"><b>3. 假设 / 之间的关系</b>操越……反越……</div>
+            <div class="mini-card"><b>4. 变数</b>操纵性变数：不同<br>反应性变数：观察<br>固定性变数：一样</div>
+            <div class="mini-card"><b>5. 结论</b>科学原理 / 操越……反越……</div>
+            <div class="mini-card"><b>6. 推断</b>为什么？</div>
+            <div class="mini-card"><b>7. 观察结果</b>1 看 2 比 3 最</div>
+            <div class="mini-card"><b>8. 变化形式</b>上升、下降、保持不变、增加、减少</div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="intro-overlay" id="introOverlay">
+    <div class="intro-card">
+      <video id="introVideo" autoplay muted playsinline preload="auto" controls>
+        <source src="assets/intro.mp4" type="video/mp4">
+      </video>
+      <div class="intro-fallback">
+        开场影片在这个浏览器里不能播放。可以直接进入游戏；如果你给我 MP4/H.264 版本，我可以换成稳定播放。
+      </div>
+      <div class="intro-actions">
+        <div>
+          <strong>一二三木头人：科学格式挑战</strong>
+          <div>先看开场影片，然后进入游戏舞台。</div>
+        </div>
+        <div class="controls">
+          <button class="btn secondary" id="skipIntroBtn">跳过开场</button>
+          <button class="btn" id="playIntroBtn">打开声音 + BGM</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="sound-toggle" id="soundToggle">音乐：关</button>
+  <div class="celebration" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const formatItems = [
+      { id: "aim", title: "目的", answer: "为了研究操与反之间的关系" },
+      { id: "opDef", title: "操纵性定义", answer: "我们可以根据反来确定操" },
+      { id: "hypothesis", title: "假设 / 之间的关系", answer: "操越……反越……" },
+      { id: "variables", title: "变数", answer: "操纵性变数：不同；反应性变数：观察；固定性变数：一样" },
+      { id: "conclusion", title: "结论", answer: "科学原理 / 操越……反越……" },
+      { id: "inference", title: "推断", answer: "为什么？" },
+      { id: "observation", title: "观察结果", answer: "1 看 2 比 3 最" },
+      { id: "trend", title: "变化形式", answer: "上升、下降、保持不变、增加、减少" }
+    ];
+
+    const quizQuestions = [
+      {
+        q: "目的的格式是什么？",
+        options: ["为了研究操与反之间的关系", "我们可以根据反来确定操", "为什么？"],
+        answer: "为了研究操与反之间的关系"
+      },
+      {
+        q: "操纵性定义怎样写？",
+        options: ["我们可以根据反来确定操", "操越……反越……", "1 看 2 比 3 最"],
+        answer: "我们可以根据反来确定操"
+      },
+      {
+        q: "假设常用哪个句型？",
+        options: ["操越……反越……", "操纵性变数：观察", "固定性变数：不同"],
+        answer: "操越……反越……"
+      },
+      {
+        q: "操纵性变数要写什么？",
+        options: ["不同", "观察", "一样"],
+        answer: "不同"
+      },
+      {
+        q: "反应性变数要写什么？",
+        options: ["观察", "不同", "保持不变"],
+        answer: "观察"
+      },
+      {
+        q: "固定性变数要写什么？",
+        options: ["一样", "增加", "为什么？"],
+        answer: "一样"
+      },
+      {
+        q: "结论可以用什么格式？",
+        options: ["科学原理 / 操越……反越……", "1 看 2 比 3 最", "我们可以根据反来确定操"],
+        answer: "科学原理 / 操越……反越……"
+      },
+      {
+        q: "推断是在回答什么？",
+        options: ["为什么？", "不同", "上升、下降"],
+        answer: "为什么？"
+      },
+      {
+        q: "观察结果口诀是什么？",
+        options: ["1 看 2 比 3 最", "操越……反越……", "反应性变数：一样"],
+        answer: "1 看 2 比 3 最"
+      },
+      {
+        q: "哪一组都是变化形式？",
+        options: ["上升、下降、保持不变、增加、减少", "目的、推断、观察", "不同、观察、一样"],
+        answer: "上升、下降、保持不变、增加、减少"
+      }
+    ];
+
+    const modeText = {
+      mission: ["一二三木头人", "娃娃背过去念口令；转回来眼睛发亮时，快点选出正确科学格式。"],
+      match: ["配对记忆", "点一个题目，再点正确答案。全部配对后就过关。"],
+      sort: ["格式排序", "用上、下按钮，把科学实验格式排成正确顺序。"],
+      quiz: ["快问快答", "看到题目后选正确格式，练到可以秒答。"]
+    };
+
+    const state = {
+      score: 0,
+      stars: 0,
+      mode: "mission",
+      missionIndex: 0,
+      missionLives: 3,
+      missionTime: 8,
+      missionStarted: false,
+      missionLocked: true,
+      missionTimer: null,
+      missionPhaseTimer: null,
+      missionPhase: "idle",
+      missionPenaltyLocked: false,
+      missionWon: false,
+      selectedTerm: null,
+      selectedAnswer: null,
+      matched: new Set(),
+      sortItems: [],
+      quizIndex: 0,
+      quizCorrect: 0,
+      quizLocked: false,
+      audioContext: null,
+      bgmAudio: null,
+      musicOn: false,
+      musicNodes: []
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function ensureAudio() {
+      if (!state.audioContext) {
+        state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (state.audioContext.state === "suspended") {
+        state.audioContext.resume();
+      }
+      return state.audioContext;
+    }
+
+    function playTone(frequency, duration = 0.18, type = "sine", volume = 0.08) {
+      const audio = ensureAudio();
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+      oscillator.type = type;
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(volume, audio.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + duration);
+      oscillator.connect(gain).connect(audio.destination);
+      oscillator.start();
+      oscillator.stop(audio.currentTime + duration);
+    }
+
+    function startMusic() {
+      if (state.musicOn) return;
+      if (!state.bgmAudio) {
+        state.bgmAudio = new Audio("assets/bgm-squid-game.mp3");
+        state.bgmAudio.loop = true;
+        state.bgmAudio.volume = 0.55;
+      }
+      const bgmPromise = state.bgmAudio.play();
+      if (bgmPromise) {
+        bgmPromise
+          .then(() => {
+            state.musicOn = true;
+            el("soundToggle").textContent = "音乐：开";
+          })
+          .catch(() => startGeneratedMusic());
+        return;
+      }
+      state.musicOn = true;
+      el("soundToggle").textContent = "音乐：开";
+    }
+
+    function startGeneratedMusic() {
+      if (state.musicOn) return;
+      const audio = ensureAudio();
+      const master = audio.createGain();
+      master.gain.value = 0.035;
+      master.connect(audio.destination);
+
+      let step = 0;
+      const interval = setInterval(() => {
+        const now = audio.currentTime;
+        const bassNotes = [73.42, 73.42, 87.31, 65.41, 73.42, 98, 87.31, 65.41];
+        const bass = audio.createOscillator();
+        const bassGain = audio.createGain();
+        bass.type = "sawtooth";
+        bass.frequency.value = bassNotes[step % bassNotes.length];
+        bassGain.gain.setValueAtTime(0.0001, now);
+        bassGain.gain.linearRampToValueAtTime(0.32, now + 0.025);
+        bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+        bass.connect(bassGain).connect(master);
+        bass.start(now);
+        bass.stop(now + 0.24);
+
+        if (step % 4 === 0) {
+          const kick = audio.createOscillator();
+          const kickGain = audio.createGain();
+          kick.type = "sine";
+          kick.frequency.setValueAtTime(120, now);
+          kick.frequency.exponentialRampToValueAtTime(45, now + 0.16);
+          kickGain.gain.setValueAtTime(0.65, now);
+          kickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+          kick.connect(kickGain).connect(master);
+          kick.start(now);
+          kick.stop(now + 0.2);
+        }
+
+        if (step % 2 === 1) {
+          const tick = audio.createOscillator();
+          const tickGain = audio.createGain();
+          tick.type = "square";
+          tick.frequency.value = 880;
+          tickGain.gain.setValueAtTime(0.12, now);
+          tickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+          tick.connect(tickGain).connect(master);
+          tick.start(now);
+          tick.stop(now + 0.06);
+        }
+
+        step += 1;
+      }, 300);
+
+      state.musicNodes = [{ master, interval }];
+      state.musicOn = true;
+      el("soundToggle").textContent = "音乐：开";
+    }
+
+    function stopMusic() {
+      if (state.bgmAudio) {
+        state.bgmAudio.pause();
+        state.bgmAudio.currentTime = 0;
+      }
+      state.musicNodes.forEach((node) => {
+        clearInterval(node.interval);
+        node.master.disconnect();
+      });
+      state.musicNodes = [];
+      state.musicOn = false;
+      el("soundToggle").textContent = "音乐：关";
+    }
+
+    function toggleMusic() {
+      if (state.musicOn) {
+        stopMusic();
+      } else {
+        startMusic();
+      }
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function pickMissionChoices(item) {
+      const wrong = shuffle(formatItems.filter((candidate) => candidate.id !== item.id))
+        .slice(0, 2)
+        .map((candidate) => candidate.answer);
+      return shuffle([item.answer, ...wrong]);
+    }
+
+    function addScore(points) {
+      state.score += points;
+      el("score").textContent = state.score;
+    }
+
+    function addStar() {
+      state.stars += 1;
+      el("stars").textContent = state.stars;
+    }
+
+    function toast(message) {
+      const box = el("toast");
+      box.textContent = message;
+      box.classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => box.classList.remove("show"), 1800);
+    }
+
+    function setFeedback(id, message, type = "") {
+      const node = el(id);
+      node.textContent = message;
+      node.className = `feedback ${type}`;
+    }
+
+    function renderMission() {
+      const track = el("trackPath");
+      track.innerHTML = "";
+      formatItems.forEach((item, index) => {
+        const gate = document.createElement("div");
+        gate.className = "gate";
+        gate.dataset.step = index + 1;
+        gate.innerHTML = `<div class="gate-title">${item.title}</div>`;
+        track.appendChild(gate);
+      });
+      resetMission();
+    }
+
+    function resetMission() {
+      clearInterval(state.missionTimer);
+      clearInterval(state.missionPhaseTimer);
+      clearTimeout(state.missionPhaseTimer);
+      stopRedLightVideo();
+      state.missionIndex = 0;
+      state.missionLives = 3;
+      state.missionTime = 8;
+      state.missionStarted = false;
+      state.missionLocked = true;
+      state.missionPhase = "idle";
+      state.missionPenaltyLocked = false;
+      state.missionWon = false;
+      el("missionOver").classList.remove("show");
+      el("missionStartBtn").textContent = "开始游戏";
+      setArenaPhase("looking-away", "准备开始", "safe");
+      setMissionPanelState("idle-panel");
+      updateMissionScreen();
+      setMissionFeedback("按下开始，娃娃会先背过去念“一二三木头人”。", "");
+      setTimeout(updateRunnerPosition, 40);
+    }
+
+    function startMission() {
+      if (state.missionStarted) {
+        resetMission();
+        return;
+      }
+      if (state.missionLives <= 0 || state.missionTime <= 0 || state.missionWon || el("missionOver").classList.contains("show")) {
+        resetMission();
+      }
+      state.missionStarted = true;
+      state.missionLocked = true;
+      startMusic();
+      el("missionStartBtn").textContent = "重新开始";
+      setMissionPanelState("playing-panel");
+      beginChantPhase();
+    }
+
+    function setArenaPhase(phase, text, tone) {
+      const arena = el("missionArena");
+      const banner = el("phaseBanner");
+      arena.classList.remove("looking-away", "watching", "alarm");
+      if (phase) arena.classList.add(phase);
+      banner.textContent = text;
+      banner.className = `phase-banner ${tone || ""}`;
+    }
+
+    function setMissionPanelState(panelState) {
+      const panel = document.querySelector(".mission-panel");
+      panel.classList.remove("idle-panel", "playing-panel", "force-show");
+      if (panelState) panel.classList.add(panelState);
+    }
+
+    function playRedLightVideo() {
+      const video = el("redLightVideo");
+      const fallback = el("redLightFallback");
+      if (!video) return;
+      video.currentTime = 0;
+      const playPromise = video.play();
+      if (playPromise) {
+        playPromise
+          .then(() => fallback.classList.remove("show"))
+          .catch(() => fallback.classList.add("show"));
+      }
+    }
+
+    function triggerRedFlash() {
+      const arena = el("missionArena");
+      const flash = el("redFlash");
+      arena.classList.add("flash-red");
+      flash.classList.remove("active");
+      void flash.offsetWidth;
+      flash.classList.add("active");
+      setTimeout(() => {
+        arena.classList.remove("flash-red");
+        flash.classList.remove("active");
+      }, 760);
+    }
+
+    function stopRedLightVideo() {
+      const video = el("redLightVideo");
+      const fallback = el("redLightFallback");
+      if (!video) return;
+      video.pause();
+      video.currentTime = 0;
+      if (fallback) fallback.classList.remove("show");
+    }
+
+    function beginChantPhase() {
+      clearInterval(state.missionTimer);
+      clearInterval(state.missionPhaseTimer);
+      clearTimeout(state.missionPhaseTimer);
+      stopRedLightVideo();
+      if (state.missionIndex >= formatItems.length) {
+        winMission();
+        return;
+      }
+
+      state.missionPhase = "chant";
+      state.missionLocked = true;
+      state.missionTime = 8;
+      setArenaPhase("looking-away", "一", "safe");
+      setMissionPanelState("playing-panel");
+      updateMissionScreen();
+      setMissionFeedback("娃娃背过去了。准备听完“一二三木头人”，它转回来就要抢答。", "good");
+      playTone(220, 0.16, "triangle", 0.05);
+
+      const chant = ["一", "一、二", "一、二、三", "一、二、三，木头人！"];
+      let step = 0;
+      state.missionPhaseTimer = setInterval(() => {
+        step += 1;
+        el("phaseBanner").textContent = chant[step] || chant[chant.length - 1];
+        playTone(220 + step * 28, 0.14, "triangle", 0.05);
+        if (step >= chant.length - 1) {
+          clearInterval(state.missionPhaseTimer);
+          state.missionPhaseTimer = setTimeout(beginWatchPhase, 520);
+        }
+      }, 650);
+    }
+
+    function beginWatchPhase() {
+      if (!state.missionStarted || state.missionWon) return;
+      state.missionPhase = "watch";
+      state.missionLocked = false;
+      state.missionPenaltyLocked = false;
+      state.missionTime = 8;
+      setArenaPhase("watching", "木头人！快答", "danger");
+      setMissionPanelState("force-show");
+      triggerRedFlash();
+      playRedLightVideo();
+      playTone(520, 0.12, "sawtooth", 0.08);
+      setTimeout(() => playTone(740, 0.14, "sawtooth", 0.07), 90);
+      updateMissionScreen();
+      setMissionFeedback("娃娃转过来了，眼睛发光！快点选正确格式。", "bad");
+
+      state.missionTimer = setInterval(() => {
+        state.missionTime -= 1;
+        el("missionTime").textContent = state.missionTime;
+        if (state.missionTime <= 0) {
+          clearInterval(state.missionTimer);
+          loseMissionStar("太慢了！娃娃看到你还没回答，掉 1 颗星。");
+        }
+      }, 1000);
+    }
+
+    function updateMissionScreen() {
+      const current = formatItems[state.missionIndex] || formatItems[formatItems.length - 1];
+      el("missionLevel").textContent = `${Math.min(state.missionIndex + 1, formatItems.length)} / ${formatItems.length}`;
+      el("missionLives").textContent = "★ ".repeat(state.missionLives).trim() || "0";
+      el("missionTime").textContent = state.missionTime;
+      el("missionLabel").textContent = state.missionPhase === "watch" ? "娃娃正在看你" : "娃娃背过去";
+      el("missionQuestion").textContent = state.missionPhase === "watch" ? current.title : "一二三木头人";
+      el("missionHint").textContent = state.missionPhase === "watch"
+        ? `题目：选出「${current.title}」的正确科学格式。`
+        : "先准备答案，娃娃转回来时才可以点。";
+
+      document.querySelectorAll(".gate").forEach((gate, index) => {
+        gate.classList.toggle("done", index < state.missionIndex);
+        gate.classList.toggle("current", index === state.missionIndex && !state.missionWon);
+      });
+
+      const choices = el("missionChoices");
+      choices.innerHTML = "";
+      pickMissionChoices(current).forEach((choice) => {
+        const button = document.createElement("button");
+        button.className = "door-choice";
+        button.textContent = choice;
+        button.disabled = state.missionLocked || state.missionWon || state.missionPhase !== "watch";
+        button.addEventListener("click", () => answerMission(button, choice));
+        choices.appendChild(button);
+      });
+    }
+
+    function setMissionFeedback(message, type) {
+      const box = el("missionFeedback");
+      box.textContent = message;
+      box.className = `mission-feedback ${type}`;
+    }
+
+    function answerMission(button, choice) {
+      if (state.missionLocked || state.missionWon || state.missionPhase !== "watch") return;
+      clearInterval(state.missionTimer);
+      const current = formatItems[state.missionIndex];
+      const correct = choice === current.answer;
+      state.missionLocked = true;
+
+      document.querySelectorAll(".door-choice").forEach((door) => {
+        door.disabled = true;
+        if (door.textContent === current.answer) door.classList.add("correct");
+      });
+
+      if (correct) {
+        button.classList.add("correct");
+        addScore(20);
+        state.missionIndex += 1;
+        setMissionFeedback("答对！娃娃转回去，学生前进一格。", "good");
+        stopRedLightVideo();
+        playTone(660, 0.14, "sine", 0.08);
+        setTimeout(() => playTone(880, 0.15, "sine", 0.07), 100);
+        el("runner").classList.add("jump");
+        setTimeout(() => el("runner").classList.remove("jump"), 220);
+        setArenaPhase("looking-away", "安全，前进", "safe");
+        updateRunnerPosition();
+
+        if (state.missionIndex >= formatItems.length) {
+          setTimeout(winMission, 650);
+          return;
+        }
+
+        setTimeout(() => {
+          beginChantPhase();
+        }, 900);
+      } else {
+        button.classList.add("wrong");
+        loseMissionStar(`答错！正确格式是：${current.answer}`);
+      }
+    }
+
+    function loseMissionStar(message) {
+      if (state.missionPenaltyLocked || state.missionWon) return;
+      state.missionPenaltyLocked = true;
+      clearInterval(state.missionTimer);
+      state.missionLocked = true;
+      state.missionLives = Math.max(0, state.missionLives - 1);
+      el("missionArena").classList.add("alarm");
+      setTimeout(() => el("missionArena").classList.remove("alarm"), 700);
+      playTone(130, 0.22, "square", 0.09);
+      setTimeout(() => playTone(95, 0.24, "square", 0.08), 120);
+      setMissionFeedback(`${message} 还剩 ${Math.max(state.missionLives, 0)} 颗星。`, "bad");
+      updateMissionScreen();
+
+      if (state.missionLives <= 0) {
+        setTimeout(() => failMission("星星用完了！先看格式表，再重新挑战。"), 750);
+        return;
+      }
+
+      setTimeout(() => {
+        beginChantPhase();
+      }, 1150);
+    }
+
+    function updateRunnerPosition() {
+      const runner = el("runner");
+      const arena = el("missionArena");
+      const gates = [...document.querySelectorAll(".gate")];
+      const index = Math.min(state.missionIndex, gates.length - 1);
+      const gate = gates[index];
+      if (!runner || !arena || !gate) return;
+
+      const arenaBox = arena.getBoundingClientRect();
+      const gateBox = gate.getBoundingClientRect();
+      const x = gateBox.left - arenaBox.left + Math.max(8, gateBox.width / 2 - 37);
+      const y = gateBox.top - arenaBox.top - 98;
+      runner.style.setProperty("--runner-x", `${x}px`);
+      runner.style.setProperty("--runner-y", `${Math.max(260, y)}px`);
+    }
+
+    function winMission() {
+      clearInterval(state.missionTimer);
+      clearInterval(state.missionPhaseTimer);
+      clearTimeout(state.missionPhaseTimer);
+      state.missionWon = true;
+      state.missionLocked = true;
+      addScore(50);
+      addStar();
+      updateMissionScreen();
+      updateRunnerPosition();
+      setArenaPhase("looking-away", "通关成功", "safe");
+      setMissionPanelState("idle-panel");
+      stopRedLightVideo();
+      el("missionOverTitle").textContent = "成功通关！";
+      el("missionOverText").textContent = "你在一二三木头人里完成了 8 个科学格式回合，得到 1 颗星。";
+      el("missionOver").classList.add("show");
+      toast("一二三木头人通关！得到 1 颗星。");
+    }
+
+    function failMission(message) {
+      clearInterval(state.missionTimer);
+      clearInterval(state.missionPhaseTimer);
+      clearTimeout(state.missionPhaseTimer);
+      state.missionStarted = false;
+      state.missionLocked = true;
+      state.missionPhase = "idle";
+      setArenaPhase("watching", "挑战失败", "danger");
+      setMissionPanelState("idle-panel");
+      stopRedLightVideo();
+      el("missionOverTitle").textContent = "挑战失败";
+      el("missionOverText").textContent = message;
+      el("missionOver").classList.add("show");
+      el("missionStartBtn").textContent = "重新开始";
+      setMissionFeedback(message, "bad");
+    }
+
+    function renderMatch() {
+      const termCards = el("termCards");
+      const answerCards = el("answerCards");
+      termCards.innerHTML = "";
+      answerCards.innerHTML = "";
+      state.selectedTerm = null;
+      state.selectedAnswer = null;
+
+      formatItems.forEach((item) => {
+        const card = document.createElement("button");
+        card.className = "card";
+        card.dataset.id = item.id;
+        card.innerHTML = `<strong>${item.title}</strong><span>选择对应格式</span>`;
+        card.addEventListener("click", () => selectMatch("term", item.id));
+        termCards.appendChild(card);
+      });
+
+      shuffle(formatItems).forEach((item) => {
+        const card = document.createElement("button");
+        card.className = "card";
+        card.dataset.id = item.id;
+        card.innerHTML = `<strong>答案</strong><span>${item.answer}</span>`;
+        card.addEventListener("click", () => selectMatch("answer", item.id));
+        answerCards.appendChild(card);
+      });
+    }
+
+    function selectMatch(type, id) {
+      if (state.matched.has(id)) return;
+      if (type === "term") state.selectedTerm = id;
+      if (type === "answer") state.selectedAnswer = id;
+
+      document.querySelectorAll("#termCards .card, #answerCards .card").forEach((card) => {
+        const selected = (card.dataset.id === state.selectedTerm && card.parentElement.id === "termCards") ||
+          (card.dataset.id === state.selectedAnswer && card.parentElement.id === "answerCards");
+        card.classList.toggle("selected", selected);
+      });
+
+      if (!state.selectedTerm || !state.selectedAnswer) return;
+
+      if (state.selectedTerm === state.selectedAnswer) {
+        state.matched.add(id);
+        document.querySelectorAll(`[data-id="${id}"]`).forEach((card) => {
+          card.classList.remove("selected");
+          card.classList.add("correct");
+          card.disabled = true;
+        });
+        addScore(10);
+        setFeedback("matchFeedback", "答对了！这个格式记住了。", "good");
+        state.selectedTerm = null;
+        state.selectedAnswer = null;
+        if (state.matched.size === formatItems.length) {
+          addStar();
+          toast("配对完成！得到 1 颗星。");
+          setFeedback("matchFeedback", "全部配对成功！可以去挑战排序。", "good");
+        }
+      } else {
+        document.querySelectorAll(".card.selected").forEach((card) => card.classList.add("wrong"));
+        setFeedback("matchFeedback", "再想想：题目和答案格式还没配上。", "bad");
+        setTimeout(() => {
+          document.querySelectorAll(".card").forEach((card) => card.classList.remove("selected", "wrong"));
+          state.selectedTerm = null;
+          state.selectedAnswer = null;
+        }, 420);
+      }
+    }
+
+    function renderSort() {
+      state.sortItems = shuffle(formatItems);
+      updateSort();
+    }
+
+    function updateSort() {
+      const area = el("sortArea");
+      area.innerHTML = "";
+      state.sortItems.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "sort-card";
+        card.innerHTML = `
+          <div class="sort-index">${index + 1}</div>
+          <div><b>${item.title}</b><br><span>${item.answer}</span></div>
+          <div class="sort-actions">
+            <button class="icon-btn" aria-label="向上" ${index === 0 ? "disabled" : ""}>↑</button>
+            <button class="icon-btn" aria-label="向下" ${index === state.sortItems.length - 1 ? "disabled" : ""}>↓</button>
+          </div>
+        `;
+        const [up, down] = card.querySelectorAll("button");
+        up.addEventListener("click", () => moveSort(index, -1));
+        down.addEventListener("click", () => moveSort(index, 1));
+        area.appendChild(card);
+      });
+    }
+
+    function moveSort(index, direction) {
+      const next = index + direction;
+      if (next < 0 || next >= state.sortItems.length) return;
+      [state.sortItems[index], state.sortItems[next]] = [state.sortItems[next], state.sortItems[index]];
+      updateSort();
+      checkSort(false);
+    }
+
+    function checkSort(showWrong = true) {
+      const correct = state.sortItems.every((item, index) => item.id === formatItems[index].id);
+      if (correct) {
+        addScore(30);
+        addStar();
+        toast("顺序正确！得到 1 颗星。");
+        setFeedback("sortFeedback", "顺序正确：目的 → 操纵性定义 → 假设 → 变数 → 结论 → 推断 → 观察结果 → 变化形式", "good");
+      } else if (showWrong) {
+        setFeedback("sortFeedback", "还没完全正确。提示：先目的，再操纵性定义，再假设。", "bad");
+      } else {
+        setFeedback("sortFeedback", "继续调整，排对会自动提示。");
+      }
+      return correct;
+    }
+
+    function renderQuiz() {
+      state.quizIndex = 0;
+      state.quizCorrect = 0;
+      state.quizLocked = false;
+      el("quizTotal").textContent = quizQuestions.length;
+      showQuizQuestion();
+    }
+
+    function showQuizQuestion() {
+      const question = quizQuestions[state.quizIndex];
+      el("quizCount").textContent = `第 ${state.quizIndex + 1} 题`;
+      el("quizQuestion").textContent = question.q;
+      el("quizCorrect").textContent = state.quizCorrect;
+      el("quizMeter").style.width = `${(state.quizIndex / quizQuestions.length) * 100}%`;
+      setFeedback("quizFeedback", "选一个答案。");
+      state.quizLocked = false;
+
+      const choices = el("choices");
+      choices.innerHTML = "";
+      shuffle(question.options).forEach((option) => {
+        const button = document.createElement("button");
+        button.className = "choice";
+        button.textContent = option;
+        button.addEventListener("click", () => answerQuiz(button, option));
+        choices.appendChild(button);
+      });
+    }
+
+    function answerQuiz(button, option) {
+      if (state.quizLocked) return;
+      state.quizLocked = true;
+      const question = quizQuestions[state.quizIndex];
+      const correct = option === question.answer;
+
+      document.querySelectorAll(".choice").forEach((choice) => {
+        if (choice.textContent === question.answer) choice.classList.add("correct");
+        choice.disabled = true;
+      });
+
+      if (correct) {
+        button.classList.add("correct");
+        state.quizCorrect += 1;
+        addScore(10);
+        setFeedback("quizFeedback", "答对！继续保持。", "good");
+      } else {
+        button.classList.add("wrong");
+        setFeedback("quizFeedback", `正确答案：${question.answer}`, "bad");
+      }
+
+      setTimeout(() => {
+        state.quizIndex += 1;
+        if (state.quizIndex >= quizQuestions.length) {
+          el("quizMeter").style.width = "100%";
+          el("quizCorrect").textContent = state.quizCorrect;
+          if (state.quizCorrect >= 8) {
+            addStar();
+            toast("快问快答完成！得到 1 颗星。");
+          }
+          setFeedback("quizFeedback", `完成！你答对 ${state.quizCorrect} / ${quizQuestions.length} 题。`, state.quizCorrect >= 8 ? "good" : "bad");
+          return;
+        }
+        showQuizQuestion();
+      }, 900);
+    }
+
+    function setMode(mode) {
+      if (state.mode === "mission" && mode !== "mission") {
+        clearInterval(state.missionTimer);
+        clearInterval(state.missionPhaseTimer);
+        clearTimeout(state.missionPhaseTimer);
+        state.missionStarted = false;
+        state.missionLocked = true;
+        state.missionPhase = "idle";
+        el("missionStartBtn").textContent = "继续游戏";
+      }
+      state.mode = mode;
+      document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.mode === mode));
+      document.querySelectorAll(".mode").forEach((section) => section.classList.remove("active"));
+      el(`${mode}Mode`).classList.add("active");
+      el("modeTitle").textContent = modeText[mode][0];
+      el("modeNote").textContent = modeText[mode][1];
+    }
+
+    function resetMode() {
+      if (state.mode === "match") {
+        state.matched.clear();
+        renderMatch();
+        setFeedback("matchFeedback", "先选左边，再选右边。");
+      }
+      if (state.mode === "mission") {
+        resetMission();
+      }
+      if (state.mode === "sort") {
+        renderSort();
+        setFeedback("sortFeedback", "把科学实验格式排成正确顺序。");
+      }
+      if (state.mode === "quiz") {
+        renderQuiz();
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => setMode(tab.dataset.mode));
+    });
+
+    function enterGameFromIntro() {
+      el("introOverlay").classList.add("hidden");
+      const video = el("introVideo");
+      video.pause();
+      video.currentTime = 0;
+    }
+
+    el("playIntroBtn").addEventListener("click", () => {
+      ensureAudio();
+      startMusic();
+      const video = el("introVideo");
+      video.muted = false;
+      video.volume = 1;
+      document.querySelector(".intro-card").classList.remove("video-error");
+      const playPromise = video.play();
+      if (playPromise) {
+        playPromise.catch(() => {
+          document.querySelector(".intro-card").classList.add("video-error");
+        });
+      }
+    });
+
+    el("skipIntroBtn").addEventListener("click", () => {
+      ensureAudio();
+      enterGameFromIntro();
+    });
+
+    el("introVideo").addEventListener("ended", enterGameFromIntro);
+    el("introVideo").addEventListener("error", () => {
+      document.querySelector(".intro-card").classList.add("video-error");
+    });
+    window.addEventListener("load", () => {
+      const video = el("introVideo");
+      const playPromise = video.play();
+      if (playPromise) {
+        playPromise.catch(() => {});
+      }
+    });
+    el("soundToggle").addEventListener("click", toggleMusic);
+    el("resetBtn").addEventListener("click", resetMode);
+    el("missionStartBtn").addEventListener("click", startMission);
+    el("studyBtn").addEventListener("click", () => {
+      const panel = el("studyPanel");
+      panel.hidden = !panel.hidden;
+      el("studyBtn").textContent = panel.hidden ? "看格式表" : "收起格式表";
+    });
+
+    window.addEventListener("resize", updateRunnerPosition);
+    renderMission();
+    renderMatch();
+    renderSort();
+    renderQuiz();
+  </script>
+</body>
+</html>
