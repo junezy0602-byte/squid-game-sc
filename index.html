@@ -1522,7 +1522,7 @@
 
     .stage-characters {
       position: absolute;
-      inset: 74px 20px 170px;
+      inset: 74px 20px 90px;
       z-index: 3;
       transform-style: preserve-3d;
       pointer-events: none;
@@ -1537,7 +1537,7 @@
       bottom: 0;
       transform-style: preserve-3d;
       filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.38));
-      transition: transform 0.45s ease, filter 0.25s ease;
+      transition: transform 1.25s cubic-bezier(.2, .72, .2, 1), filter 0.35s ease;
       user-select: none;
       isolation: isolate;
     }
@@ -1583,7 +1583,8 @@
       left: 50%;
       width: min(43vw, 390px);
       height: min(56vw, 440px);
-      transform: translateX(-50%) rotateY(180deg) rotateX(2deg) translateZ(80px);
+      transform: translateX(-50%) rotateY(34deg) rotateX(1deg) translateZ(74px) scale(0.98);
+      transform-origin: 50% 52%;
       z-index: 4;
       overflow: hidden;
       clip-path: inset(0 30% 0 30%);
@@ -1596,15 +1597,15 @@
     }
 
     .mission-arena.watching .real-doll {
-      transform: translateX(-50%) rotateY(0deg) rotateX(2deg) translateZ(128px) scale(1.08);
+      transform: translateX(-50%) rotateY(0deg) rotateX(1deg) translateZ(118px) scale(1.04);
       filter: drop-shadow(0 28px 24px rgba(0, 0, 0, 0.42)) drop-shadow(0 0 24px rgba(255, 22, 77, 0.28));
-      animation: dollSnap 0.5s cubic-bezier(.18, .89, .32, 1.28);
+      animation: dollSnap 1.35s cubic-bezier(.2, .72, .2, 1);
     }
 
     @keyframes dollSnap {
-      0% { transform: translateX(-50%) rotateY(180deg) rotateX(2deg) translateZ(80px) scale(1); }
-      62% { transform: translateX(-50%) rotateY(-14deg) rotateX(2deg) translateZ(138px) scale(1.1); }
-      100% { transform: translateX(-50%) rotateY(0deg) rotateX(2deg) translateZ(128px) scale(1.08); }
+      0% { transform: translateX(-50%) rotateY(34deg) rotateX(1deg) translateZ(74px) scale(0.98); }
+      68% { transform: translateX(-50%) rotateY(-5deg) rotateX(1deg) translateZ(120px) scale(1.045); }
+      100% { transform: translateX(-50%) rotateY(0deg) rotateX(1deg) translateZ(118px) scale(1.04); }
     }
 
     .real-guard {
@@ -1990,7 +1991,7 @@
       }
 
       .stage-characters {
-        inset: 86px 8px 300px;
+        inset: 86px 8px 240px;
       }
 
       .real-doll {
@@ -2683,6 +2684,8 @@
       playTone(220, 0.16, "triangle", 0.05);
 
       const chant = ["一", "一、二", "一、二、三", "一、二、三，木头人！"];
+      const chantStepMs = 1600;
+      const turnDelayMs = 1300;
       let step = 0;
       state.missionPhaseTimer = setInterval(() => {
         step += 1;
@@ -2690,9 +2693,9 @@
         playTone(220 + step * 28, 0.14, "triangle", 0.05);
         if (step >= chant.length - 1) {
           clearInterval(state.missionPhaseTimer);
-          state.missionPhaseTimer = setTimeout(beginWatchPhase, 520);
+          state.missionPhaseTimer = setTimeout(beginWatchPhase, turnDelayMs);
         }
-      }, 650);
+      }, chantStepMs);
     }
 
     function beginWatchPhase() {
