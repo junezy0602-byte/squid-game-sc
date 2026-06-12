@@ -1624,6 +1624,46 @@
       transform: rotateY(-28deg) rotateX(2deg) translateZ(-50px);
     }
 
+    .guard-backup {
+      display: none;
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      bottom: 0;
+      height: 94%;
+      border-radius: 38px 38px 12px 12px;
+      background:
+        radial-gradient(circle at 50% 16%, #111820 0 34px, transparent 35px),
+        linear-gradient(180deg, #ff456d 0 64%, #db244f 64% 100%);
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      box-shadow: inset 0 -28px 0 rgba(0, 0, 0, 0.14), 0 20px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .guard-backup::before {
+      content: "□";
+      position: absolute;
+      left: 50%;
+      top: 13%;
+      transform: translate(-50%, -50%);
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #0b1118;
+      color: white;
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .photo-actor.image-missing img {
+      display: none;
+    }
+
+    .photo-actor.image-missing .guard-backup {
+      display: block;
+    }
+
     .eye-beam {
       position: absolute;
       left: 50%;
@@ -2074,7 +2114,7 @@
         <div class="arena-copy">
           <div class="arena-kicker">Y4 SCIENCE FORMAT GAME</div>
           <h2>答对格式，继续前进</h2>
-          <p>学生每完成一轮配对、排序或快问快答，就像通过一个记忆关卡。目标很简单：把科学实验格式背到可以马上说出来。</p>
+          <p>学生在“一二三木头人”里听口令、等娃娃转头，再快速选出正确科学实验格式。</p>
           <div class="symbol-strip" aria-hidden="true">
             <div class="symbol">○</div>
             <div class="symbol">△</div>
@@ -2107,13 +2147,6 @@
         </div>
       </section>
 
-      <nav class="tabs" aria-label="游戏模式">
-        <button class="tab active" data-mode="mission">一二三木头人</button>
-        <button class="tab" data-mode="match">配对记忆</button>
-        <button class="tab" data-mode="sort">格式排序</button>
-        <button class="tab" data-mode="quiz">快问快答</button>
-      </nav>
-
       <section class="game-shell">
         <div class="game-head">
           <div>
@@ -2139,14 +2172,16 @@
                 <div class="phase-banner safe" id="phaseBanner">准备开始</div>
                 <div class="stage-characters" aria-hidden="true">
                   <div class="photo-actor real-guard left">
-                    <img src="assets/squid-game-gamer.png" alt="">
+                    <img src="assets/squid-game-gamer.png" alt="" onerror="this.parentElement.classList.add('image-missing')">
+                    <div class="guard-backup"></div>
                   </div>
                   <div class="photo-actor real-doll" id="realDoll">
                     <img src="assets/doll.png" alt="">
                     <div class="eye-beam"></div>
                   </div>
                   <div class="photo-actor real-guard right">
-                    <img src="assets/squid-game-gamer.png" alt="">
+                    <img src="assets/squid-game-gamer.png" alt="" onerror="this.parentElement.classList.add('image-missing')">
+                    <div class="guard-backup"></div>
                   </div>
                 </div>
                 <div class="doll-post" aria-hidden="true">
@@ -2202,50 +2237,6 @@
             </div>
           </section>
 
-          <section class="mode" id="matchMode">
-            <div class="match-grid">
-              <div>
-                <p class="column-title">题目</p>
-                <div class="card-list" id="termCards"></div>
-              </div>
-              <div>
-                <p class="column-title">答案格式</p>
-                <div class="card-list" id="answerCards"></div>
-              </div>
-            </div>
-            <div class="feedback" id="matchFeedback">先选左边，再选右边。</div>
-          </section>
-
-          <section class="mode" id="sortMode">
-            <div class="sort-area" id="sortArea"></div>
-            <div class="feedback" id="sortFeedback">把科学实验格式排成正确顺序。</div>
-          </section>
-
-          <section class="mode" id="quizMode">
-            <div class="quiz-layout">
-              <div>
-                <div class="question-box">
-                  <div class="question-label" id="quizCount">第 1 题</div>
-                  <div class="question-text" id="quizQuestion">题目</div>
-                </div>
-                <div class="choices" id="choices"></div>
-                <div class="feedback" id="quizFeedback">选一个答案。</div>
-              </div>
-              <aside class="progress-card">
-                <b>快问快答进度</b>
-                <div class="meter" aria-label="进度">
-                  <div class="meter-fill" id="quizMeter"></div>
-                </div>
-                <div>答对：<b id="quizCorrect">0</b> / <span id="quizTotal">0</span></div>
-                <div class="fact-list">
-                  <div class="fact"><b>口诀 1</b>目的：为了研究操与反之间的关系</div>
-                  <div class="fact"><b>口诀 2</b>操纵性变数不同，反应性变数观察，固定性变数一样</div>
-                  <div class="fact"><b>口诀 3</b>假设和结论常用：操越……反越……</div>
-                </div>
-              </aside>
-            </div>
-          </section>
-
           <section class="teacher-panel" id="studyPanel" hidden>
             <div class="mini-card"><b>1. 目的</b>为了研究操与反之间的关系</div>
             <div class="mini-card"><b>2. 操纵性定义</b>我们可以根据反来确定操</div>
@@ -2282,7 +2273,7 @@
     </div>
   </div>
 
-  <button class="sound-toggle" id="soundToggle">音乐：关</button>
+  <button class="sound-toggle" id="soundToggle">声音：开</button>
   <div class="celebration" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -2351,10 +2342,7 @@
     ];
 
     const modeText = {
-      mission: ["一二三木头人", "娃娃背过去念口令；转回来眼睛发亮时，快点选出正确科学格式。"],
-      match: ["配对记忆", "点一个题目，再点正确答案。全部配对后就过关。"],
-      sort: ["格式排序", "用上、下按钮，把科学实验格式排成正确顺序。"],
-      quiz: ["快问快答", "看到题目后选正确格式，练到可以秒答。"]
+      mission: ["一二三木头人", "娃娃背过去念口令；转回来眼睛发亮时，快点选出正确科学格式。"]
     };
 
     const state = {
@@ -2380,7 +2368,10 @@
       quizLocked: false,
       audioContext: null,
       bgmAudio: null,
+      correctAudio: null,
+      wrongAudio: null,
       musicOn: false,
+      soundEnabled: true,
       musicNodes: []
     };
 
@@ -2397,6 +2388,7 @@
     }
 
     function playTone(frequency, duration = 0.18, type = "sine", volume = 0.08) {
+      if (!state.soundEnabled) return;
       const audio = ensureAudio();
       const oscillator = audio.createOscillator();
       const gain = audio.createGain();
@@ -2410,24 +2402,41 @@
     }
 
     function startMusic() {
-      if (state.musicOn) return;
+      if (!state.soundEnabled) return;
       if (!state.bgmAudio) {
         state.bgmAudio = new Audio("assets/bgm-squid-game.mp3");
-        state.bgmAudio.loop = true;
-        state.bgmAudio.volume = 0.55;
+        state.bgmAudio.loop = false;
+        state.bgmAudio.volume = 0.9;
+        state.bgmAudio.addEventListener("ended", () => {
+          state.musicOn = false;
+        });
       }
+      state.bgmAudio.pause();
+      state.bgmAudio.currentTime = 0;
       const bgmPromise = state.bgmAudio.play();
       if (bgmPromise) {
         bgmPromise
           .then(() => {
             state.musicOn = true;
-            el("soundToggle").textContent = "音乐：开";
           })
-          .catch(() => startGeneratedMusic());
+          .catch(() => {});
         return;
       }
       state.musicOn = true;
-      el("soundToggle").textContent = "音乐：开";
+    }
+
+    function playSoundEffect(type) {
+      if (!state.soundEnabled) return;
+      const key = type === "correct" ? "correctAudio" : "wrongAudio";
+      const file = type === "correct" ? "assets/correct.mp3" : "assets/wrong.mp3";
+      if (!state[key]) {
+        state[key] = new Audio(file);
+        state[key].volume = type === "correct" ? 0.85 : 0.9;
+      }
+      state[key].pause();
+      state[key].currentTime = 0;
+      const soundPromise = state[key].play();
+      if (soundPromise) soundPromise.catch(() => {});
     }
 
     function startGeneratedMusic() {
@@ -2482,7 +2491,6 @@
 
       state.musicNodes = [{ master, interval }];
       state.musicOn = true;
-      el("soundToggle").textContent = "音乐：开";
     }
 
     function stopMusic() {
@@ -2496,14 +2504,15 @@
       });
       state.musicNodes = [];
       state.musicOn = false;
-      el("soundToggle").textContent = "音乐：关";
     }
 
     function toggleMusic() {
-      if (state.musicOn) {
+      state.soundEnabled = !state.soundEnabled;
+      el("soundToggle").textContent = state.soundEnabled ? "声音：开" : "声音：关";
+      if (!state.soundEnabled) {
         stopMusic();
-      } else {
-        startMusic();
+        if (state.correctAudio) state.correctAudio.pause();
+        if (state.wrongAudio) state.wrongAudio.pause();
       }
     }
 
@@ -2592,7 +2601,6 @@
       }
       state.missionStarted = true;
       state.missionLocked = true;
-      startMusic();
       el("missionStartBtn").textContent = "重新开始";
       setMissionPanelState("playing-panel");
       beginChantPhase();
@@ -2671,6 +2679,7 @@
       setMissionPanelState("playing-panel");
       updateMissionScreen();
       setMissionFeedback("娃娃背过去了。准备听完“一二三木头人”，它转回来就要抢答。", "good");
+      startMusic();
       playTone(220, 0.16, "triangle", 0.05);
 
       const chant = ["一", "一、二", "一、二、三", "一、二、三，木头人！"];
@@ -2763,6 +2772,7 @@
         state.missionIndex += 1;
         setMissionFeedback("答对！娃娃转回去，学生前进一格。", "good");
         stopRedLightVideo();
+        playSoundEffect("correct");
         playTone(660, 0.14, "sine", 0.08);
         setTimeout(() => playTone(880, 0.15, "sine", 0.07), 100);
         el("runner").classList.add("jump");
@@ -2792,6 +2802,7 @@
       state.missionLives = Math.max(0, state.missionLives - 1);
       el("missionArena").classList.add("alarm");
       setTimeout(() => el("missionArena").classList.remove("alarm"), 700);
+      playSoundEffect("wrong");
       playTone(130, 0.22, "square", 0.09);
       setTimeout(() => playTone(95, 0.24, "square", 0.08), 120);
       setMissionFeedback(`${message} 还剩 ${Math.max(state.missionLives, 0)} 颗星。`, "bad");
@@ -3059,21 +3070,7 @@
     }
 
     function resetMode() {
-      if (state.mode === "match") {
-        state.matched.clear();
-        renderMatch();
-        setFeedback("matchFeedback", "先选左边，再选右边。");
-      }
-      if (state.mode === "mission") {
-        resetMission();
-      }
-      if (state.mode === "sort") {
-        renderSort();
-        setFeedback("sortFeedback", "把科学实验格式排成正确顺序。");
-      }
-      if (state.mode === "quiz") {
-        renderQuiz();
-      }
+      resetMission();
     }
 
     document.querySelectorAll(".tab").forEach((tab) => {
@@ -3089,7 +3086,6 @@
 
     el("playIntroBtn").addEventListener("click", () => {
       ensureAudio();
-      startMusic();
       const video = el("introVideo");
       video.muted = false;
       video.volume = 1;
@@ -3139,9 +3135,6 @@
 
     window.addEventListener("resize", updateRunnerPosition);
     renderMission();
-    renderMatch();
-    renderSort();
-    renderQuiz();
   </script>
 </body>
 </html>

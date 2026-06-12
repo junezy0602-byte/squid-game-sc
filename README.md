@@ -7,9 +7,13 @@ This is a static HTML game for Year 4 science experiment format practice.
 - `index.html` - main game file
 - `assets/intro.mp4` - intro video
 - `assets/red-light.mp4` - red-light / doll phase video
-- `assets/bgm-squid-game.mp3` - background music
+- `assets/bgm-squid-game.mp3` - 一二三木头人口令 / chant audio
+- `assets/correct.mp3` - correct answer sound
+- `assets/wrong.mp3` - wrong answer sound
 - `assets/doll.png` - doll character image
 - `assets/squid-game-gamer.png` - guard character image
+
+Do not upload old files such as `intro.mp4.mov` or `red-light.mp4.mov`.
 
 ## Run Locally
 
@@ -41,7 +45,7 @@ GitHub will give you a website link after deployment.
 
 ## Audio Note
 
-Modern browsers block autoplay with sound. The intro video can autoplay only when muted. To play intro sound and BGM, the player must click `打开声音 + BGM`.
+Modern browsers block autoplay with sound. The intro video can autoplay only when muted. To play intro sound, the player must click `打开声音 + BGM`. The chant audio starts when the player clicks `开始游戏`.
 
 ## Video Note
 
