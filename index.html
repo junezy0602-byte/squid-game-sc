@@ -1129,16 +1129,75 @@
       inset: 18px;
       z-index: 8;
       border-radius: 8px;
-      background: rgba(7, 21, 29, 0.88);
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 71, 126, 0.28), transparent 32%),
+        rgba(7, 21, 29, 0.9);
       color: white;
       display: none;
       place-items: center;
       text-align: center;
       padding: 24px;
+      overflow: hidden;
     }
 
     .mission-over.show {
       display: grid;
+    }
+
+    .mission-over.level-clear::before,
+    .mission-over.level-clear::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% 16% -12%;
+      height: 34px;
+      background:
+        repeating-linear-gradient(45deg, #ffffff 0 18px, #ff477e 18px 36px);
+      opacity: 0.88;
+      transform: rotate(-4deg);
+      animation: unlockStripe 1.2s linear infinite;
+    }
+
+    .mission-over.level-clear::after {
+      inset: 16% -12% auto -12%;
+      transform: rotate(4deg);
+      animation-direction: reverse;
+    }
+
+    @keyframes unlockStripe {
+      from { background-position: 0 0; }
+      to { background-position: 72px 0; }
+    }
+
+    .level-kicker {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(39, 224, 163, 0.18);
+      border: 1px solid rgba(39, 224, 163, 0.52);
+      color: #c9ffe9;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .level-countdown {
+      margin: 14px auto 16px;
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--pink), #ff8bb0);
+      color: white;
+      font-size: 38px;
+      font-weight: 900;
+      box-shadow: 0 0 0 8px rgba(255, 71, 126, 0.16), 0 18px 34px rgba(0, 0, 0, 0.32);
+      animation: countdownPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes countdownPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
     }
 
     .mission-over h3 {
@@ -2473,8 +2532,11 @@
                 <div class="track-path" id="trackPath"></div>
                 <div class="mission-over" id="missionOver">
                   <div>
+                    <div class="level-kicker" id="levelKicker" hidden>LEVEL 1 CLEAR</div>
                     <h3 id="missionOverTitle">成功通关！</h3>
                     <p id="missionOverText">你已经完成所有科学格式关卡。</p>
+                    <div class="level-countdown" id="levelCountdown" hidden>3</div>
+                    <button class="btn" id="nextLevelBtn" hidden>进入下一关</button>
                   </div>
                 </div>
               </div>
@@ -2700,6 +2762,8 @@
       missionLocked: true,
       missionTimer: null,
       missionPhaseTimer: null,
+      nextLevelTimer: null,
+      nextLevelCountdownTimer: null,
       missionPhase: "idle",
       missionPenaltyLocked: false,
       missionWon: false,
@@ -2921,6 +2985,8 @@
       clearInterval(state.missionTimer);
       clearInterval(state.missionPhaseTimer);
       clearTimeout(state.missionPhaseTimer);
+      clearTimeout(state.nextLevelTimer);
+      clearInterval(state.nextLevelCountdownTimer);
       stopRedLightVideo();
       state.missionIndex = 0;
       state.missionLives = 3;
@@ -2931,6 +2997,10 @@
       state.missionPenaltyLocked = false;
       state.missionWon = false;
       el("missionOver").classList.remove("show");
+      el("missionOver").classList.remove("level-clear");
+      el("nextLevelBtn").hidden = true;
+      el("levelKicker").hidden = true;
+      el("levelCountdown").hidden = true;
       el("missionStartBtn").textContent = "开始游戏";
       setArenaPhase("looking-away", "准备开始", "safe");
       setMissionPanelState("idle-panel");
@@ -3197,16 +3267,44 @@
       setArenaPhase("looking-away", "通关成功", "safe");
       setMissionPanelState("idle-panel");
       stopRedLightVideo();
-      el("missionOverTitle").textContent = "成功通关！";
-      el("missionOverText").textContent = "你在一二三木头人里完成了 8 个科学格式回合，得到 1 颗星。";
-      el("missionOver").classList.add("show");
+      el("levelKicker").hidden = false;
+      el("levelCountdown").hidden = false;
+      el("levelCountdown").textContent = "3";
+      el("missionOverTitle").textContent = "第二关解锁！";
+      el("missionOverText").textContent = "第一关完成。准备进入：连一连句子重组。";
+      el("nextLevelBtn").hidden = false;
+      el("missionOver").classList.add("show", "level-clear");
       toast("一二三木头人通关！得到 1 颗星。");
+      startNextLevelCountdown();
+      state.nextLevelTimer = setTimeout(goNextLevel, 3000);
+    }
+
+    function startNextLevelCountdown() {
+      clearInterval(state.nextLevelCountdownTimer);
+      let count = 3;
+      state.nextLevelCountdownTimer = setInterval(() => {
+        count -= 1;
+        el("levelCountdown").textContent = Math.max(count, 1);
+        if (count <= 1) clearInterval(state.nextLevelCountdownTimer);
+      }, 1000);
+    }
+
+    function goNextLevel() {
+      clearTimeout(state.nextLevelTimer);
+      clearInterval(state.nextLevelCountdownTimer);
+      el("missionOver").classList.remove("level-clear");
+      setMode("builder");
+      renderBuilder(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast("第二关：连一连开始！");
     }
 
     function failMission(message) {
       clearInterval(state.missionTimer);
       clearInterval(state.missionPhaseTimer);
       clearTimeout(state.missionPhaseTimer);
+      clearTimeout(state.nextLevelTimer);
+      clearInterval(state.nextLevelCountdownTimer);
       state.missionStarted = false;
       state.missionLocked = true;
       state.missionPhase = "idle";
@@ -3216,6 +3314,10 @@
       el("missionOverTitle").textContent = "挑战失败";
       el("missionOverText").textContent = message;
       el("missionOver").classList.add("show");
+      el("missionOver").classList.remove("level-clear");
+      el("nextLevelBtn").hidden = true;
+      el("levelKicker").hidden = true;
+      el("levelCountdown").hidden = true;
       el("missionStartBtn").textContent = "重新开始";
       setMissionFeedback(message, "bad");
     }
@@ -3625,6 +3727,7 @@
     });
     el("soundToggle").addEventListener("click", toggleMusic);
     el("resetBtn").addEventListener("click", resetMode);
+    el("nextLevelBtn").addEventListener("click", goNextLevel);
     el("missionStartBtn").addEventListener("click", (event) => {
       event.stopPropagation();
       startMission();
