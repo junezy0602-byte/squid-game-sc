@@ -17,6 +17,8 @@ This is a static HTML game for Year 4 science experiment format practice.
 - `assets/wrong.mp3` - wrong answer sound
 - `assets/doll.png` - doll character image
 - `assets/squid-game-gamer.png` - guard character image
+- `assets/doll-cutout.png` - transparent doll cutout used in the game stage
+- `assets/guard-cutout.png` - transparent guard cutout used in the game stage
 
 Do not upload old files such as `intro.mp4.mov` or `red-light.mp4.mov`.
 

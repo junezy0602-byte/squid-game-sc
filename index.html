@@ -1647,7 +1647,7 @@
     }
 
     .mission-arena {
-      min-height: clamp(620px, calc(100vh - 235px), 820px);
+      min-height: clamp(640px, calc(100vh - 220px), 820px);
       border-radius: 0 0 8px 8px;
       border-color: rgba(255, 255, 255, 0.16);
       background:
@@ -1735,12 +1735,12 @@
     }
 
     .mission-arena.watching .stage-video {
-      opacity: 0.42;
+      opacity: 0.18;
     }
 
     .stage-characters {
       position: absolute;
-      inset: 74px 20px 90px;
+      inset: 70px 20px 130px;
       z-index: 3;
       transform-style: preserve-3d;
       pointer-events: none;
@@ -1785,7 +1785,7 @@
       inset: 7px;
       z-index: -1;
       border-radius: 28px;
-      background: linear-gradient(135deg, rgba(255, 71, 126, 0.28), rgba(39, 224, 163, 0.16));
+      background: linear-gradient(135deg, rgba(255, 71, 126, 0.16), rgba(39, 224, 163, 0.1));
       transform: translateZ(-34px) translate(15px, 16px) skewY(-2deg);
       filter: blur(2px);
       opacity: 0.85;
@@ -1799,19 +1799,17 @@
 
     .real-doll {
       left: 50%;
-      width: min(43vw, 390px);
-      height: min(56vw, 440px);
+      width: min(34vw, 270px);
+      height: min(58vw, 460px);
       transform: translateX(-50%) rotateY(34deg) rotateX(1deg) translateZ(74px) scale(0.98);
       transform-origin: 50% 52%;
       z-index: 4;
-      overflow: hidden;
-      clip-path: inset(0 30% 0 30%);
     }
 
     .real-doll img {
-      width: 250%;
-      max-width: none;
-      transform: translateX(-30%);
+      width: 100%;
+      max-width: 100%;
+      transform: none;
     }
 
     .mission-arena.watching .real-doll {
@@ -1827,19 +1825,19 @@
     }
 
     .real-guard {
-      width: min(23vw, 210px);
-      height: min(49vw, 340px);
+      width: min(18vw, 150px);
+      height: min(42vw, 300px);
       z-index: 2;
-      opacity: 0.92;
+      opacity: 0.86;
     }
 
     .real-guard.left {
-      left: 8%;
+      left: 12%;
       transform: rotateY(28deg) rotateX(2deg) translateZ(-50px);
     }
 
     .real-guard.right {
-      right: 8%;
+      right: 12%;
       transform: rotateY(-28deg) rotateX(2deg) translateZ(-50px);
     }
 
@@ -1912,11 +1910,11 @@
 
     .phase-banner {
       left: 50%;
-      top: 18px;
-      min-width: min(520px, calc(100% - 40px));
+      top: 16px;
+      min-width: min(440px, calc(100% - 40px));
       transform: translateX(-50%);
-      font-size: clamp(28px, 4.8vw, 58px);
-      padding: 12px 18px;
+      font-size: clamp(24px, 3.8vw, 46px);
+      padding: 10px 16px;
       z-index: 8;
       text-shadow: 0 3px 10px rgba(0, 0, 0, 0.48);
     }
@@ -1964,8 +1962,8 @@
       position: absolute;
       left: 50%;
       right: auto;
-      bottom: 28px;
-      width: min(980px, calc(100% - 36px));
+      bottom: 20px;
+      width: min(860px, calc(100% - 36px));
       transform: translateX(-50%);
       z-index: 9;
       display: grid;
@@ -2013,11 +2011,13 @@
       width: 100%;
       transform: none;
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
     }
 
     .status-tile {
       text-align: center;
-      padding: 8px 10px;
+      padding: 6px 8px;
+      font-size: 14px;
     }
 
     .status-tile,
@@ -2029,12 +2029,13 @@
     }
 
     .mission-card {
-      min-height: 118px;
+      min-height: 88px;
       text-align: center;
+      padding: 14px 16px;
     }
 
     .mission-question {
-      font-size: clamp(28px, 3.8vw, 52px);
+      font-size: clamp(24px, 3vw, 42px);
     }
 
     .door-choices {
@@ -2042,11 +2043,11 @@
     }
 
     .door-choice {
-      min-height: 86px;
+      min-height: 72px;
       display: flex;
       align-items: center;
-      padding: 16px 16px 16px 50px;
-      font-size: clamp(15px, 1.5vw, 20px);
+      padding: 12px 14px 12px 46px;
+      font-size: clamp(14px, 1.3vw, 18px);
     }
 
     #missionStartBtn,
@@ -2207,21 +2208,21 @@
       }
 
       .mission-arena {
-        min-height: 760px;
+        min-height: 720px;
       }
 
       .stage-characters {
-        inset: 86px 8px 240px;
+        inset: 82px 8px 270px;
       }
 
       .real-doll {
-        width: 300px;
+        width: 220px;
         height: 350px;
       }
 
       .real-guard {
-        width: 130px;
-        height: 250px;
+        width: 96px;
+        height: 210px;
         opacity: 0.78;
       }
 
@@ -2236,13 +2237,13 @@
       .phase-banner {
         top: 12px;
         min-width: calc(100% - 24px);
-        font-size: clamp(25px, 8vw, 40px);
+        font-size: clamp(22px, 7vw, 34px);
       }
 
       .mission-panel {
         left: 50%;
         right: auto;
-        bottom: 24px;
+        bottom: 16px;
         width: min(520px, calc(100% - 20px));
         transform: translateX(-50%);
         grid-template-columns: 1fr;
@@ -2256,8 +2257,8 @@
       }
 
       .status-tile {
-        padding: 9px;
-        font-size: 13px;
+        padding: 7px;
+        font-size: 12px;
       }
 
       .status-tile span {
@@ -2265,12 +2266,12 @@
       }
 
       .mission-card {
-        min-height: 118px;
-        padding: 13px;
+        min-height: 86px;
+        padding: 12px;
       }
 
       .mission-question {
-        font-size: 30px;
+        font-size: 26px;
       }
 
       .door-choices {
@@ -2433,15 +2434,15 @@
                 <div class="phase-banner safe" id="phaseBanner">准备开始</div>
                 <div class="stage-characters" aria-hidden="true">
                   <div class="photo-actor real-guard left">
-                    <img src="assets/squid-game-gamer.png" alt="" onerror="this.parentElement.classList.add('image-missing')">
+                    <img src="assets/guard-cutout.png" alt="" onerror="this.parentElement.classList.add('image-missing')">
                     <div class="guard-backup"></div>
                   </div>
                   <div class="photo-actor real-doll" id="realDoll">
-                    <img src="assets/doll.png" alt="">
+                    <img src="assets/doll-cutout.png" alt="">
                     <div class="eye-beam"></div>
                   </div>
                   <div class="photo-actor real-guard right">
-                    <img src="assets/squid-game-gamer.png" alt="" onerror="this.parentElement.classList.add('image-missing')">
+                    <img src="assets/guard-cutout.png" alt="" onerror="this.parentElement.classList.add('image-missing')">
                     <div class="guard-backup"></div>
                   </div>
                 </div>
