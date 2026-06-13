@@ -2080,6 +2080,8 @@
 
     .intro-overlay.hidden {
       display: none;
+      pointer-events: none;
+      visibility: hidden;
     }
 
     .intro-card {
@@ -3571,10 +3573,13 @@
     });
 
     function enterGameFromIntro() {
-      el("introOverlay").classList.add("hidden");
+      const overlay = el("introOverlay");
+      overlay.classList.add("hidden");
+      overlay.hidden = true;
       const video = el("introVideo");
       video.pause();
       video.currentTime = 0;
+      setTimeout(updateRunnerPosition, 60);
     }
 
     el("playIntroBtn").addEventListener("click", () => {
@@ -3619,7 +3624,14 @@
     });
     el("soundToggle").addEventListener("click", toggleMusic);
     el("resetBtn").addEventListener("click", resetMode);
-    el("missionStartBtn").addEventListener("click", startMission);
+    el("missionStartBtn").addEventListener("click", (event) => {
+      event.stopPropagation();
+      startMission();
+    });
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest && event.target.closest("#missionStartBtn");
+      if (button) startMission();
+    });
     el("builderUndoBtn").addEventListener("click", undoBuilderToken);
     el("builderClearBtn").addEventListener("click", clearBuilderTokens);
     el("builderCheckBtn").addEventListener("click", checkBuilderAnswer);
