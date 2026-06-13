@@ -2,6 +2,11 @@
 
 This is a static HTML game for Year 4 science experiment format practice.
 
+## Game Modes
+
+- `一二三木头人` - choose the correct science format before the doll catches you.
+- `连一连` - click word blocks in order to rebuild the science format sentence.
+
 ## Files
 
 - `index.html` - main game file

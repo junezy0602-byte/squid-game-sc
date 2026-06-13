@@ -1381,6 +1381,199 @@
       gap: 10px;
     }
 
+    .builder-game {
+      min-height: clamp(560px, calc(100vh - 250px), 760px);
+      padding: clamp(16px, 3vw, 28px);
+      border-radius: 0 0 8px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background:
+        radial-gradient(circle at 16% 12%, rgba(255, 71, 126, 0.24), transparent 28%),
+        radial-gradient(circle at 84% 12%, rgba(39, 224, 163, 0.18), transparent 28%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, #142b39, #081821);
+      background-size: auto, auto, 42px 42px, 42px 42px, auto;
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .builder-game::before,
+    .builder-game::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .builder-game::before {
+      width: 280px;
+      height: 280px;
+      left: -110px;
+      bottom: -150px;
+      background: rgba(255, 71, 126, 0.18);
+    }
+
+    .builder-game::after {
+      width: 240px;
+      height: 240px;
+      right: -100px;
+      top: -120px;
+      background: rgba(39, 224, 163, 0.14);
+    }
+
+    .builder-board {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 16px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .builder-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .builder-kicker {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255, 71, 126, 0.22);
+      border: 1px solid rgba(255, 122, 165, 0.42);
+      color: #ffd6e3;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .builder-question {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 72px);
+      line-height: 1;
+      color: white;
+    }
+
+    .builder-hint {
+      color: #b9d5d2;
+      font-weight: 800;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .builder-progress {
+      min-width: 120px;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .builder-progress span {
+      display: block;
+      color: var(--pink);
+      font-size: 28px;
+      margin-top: 4px;
+    }
+
+    .sentence-slots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+      gap: 10px;
+      padding: 14px;
+      border-radius: 8px;
+      background: rgba(7, 21, 29, 0.46);
+      border: 1px solid rgba(185, 213, 210, 0.3);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .sentence-slot {
+      min-height: 58px;
+      border-radius: 8px;
+      border: 2px dashed rgba(217, 255, 245, 0.36);
+      background: rgba(255, 255, 255, 0.06);
+      color: #d9fff5;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .sentence-slot.filled {
+      border-style: solid;
+      background: #fff7fb;
+      border-color: #ffc2d6;
+      color: var(--ink);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+    }
+
+    .token-bank {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+      gap: 10px;
+    }
+
+    .word-token {
+      min-height: 54px;
+      border-radius: 8px;
+      padding: 10px;
+      background: white;
+      border: 2px solid #d5e3e8;
+      color: var(--ink);
+      font-weight: 900;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+      transition: transform 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+    }
+
+    .word-token:hover {
+      transform: translateY(-2px);
+      border-color: #ff9bbc;
+    }
+
+    .word-token.used {
+      opacity: 0.32;
+      transform: none;
+      cursor: default;
+    }
+
+    .builder-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .builder-feedback {
+      min-height: 34px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #d9fff5;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .builder-feedback.good {
+      background: rgba(25, 169, 116, 0.18);
+      border-color: rgba(25, 169, 116, 0.5);
+      color: #c9ffe9;
+    }
+
+    .builder-feedback.bad {
+      background: rgba(228, 63, 90, 0.18);
+      border-color: rgba(228, 63, 90, 0.52);
+      color: #ffd6e0;
+      animation: shake 0.24s linear;
+    }
+
     .mini-card {
       background: white;
       border: 1px solid var(--line);
@@ -2100,6 +2293,41 @@
         padding: 8px;
       }
 
+      .builder-game {
+        min-height: 640px;
+        padding: 14px;
+      }
+
+      .builder-top {
+        display: grid;
+      }
+
+      .builder-progress {
+        width: 100%;
+        text-align: left;
+      }
+
+      .builder-progress span {
+        display: inline;
+        margin-left: 8px;
+        font-size: 22px;
+      }
+
+      .sentence-slots {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 10px;
+      }
+
+      .sentence-slot,
+      .word-token {
+        min-height: 50px;
+        font-size: 14px;
+      }
+
+      .token-bank {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .finish-line {
         right: 12px;
         bottom: 298px;
@@ -2172,6 +2400,11 @@
           </div>
         </div>
       </section>
+
+      <nav class="tabs" aria-label="游戏模式">
+        <button class="tab active" data-mode="mission">一二三木头人</button>
+        <button class="tab" data-mode="builder">连一连</button>
+      </nav>
 
       <section class="game-shell">
         <div class="game-head">
@@ -2263,6 +2496,36 @@
             </div>
           </section>
 
+          <section class="mode" id="builderMode">
+            <div class="builder-game">
+              <div class="builder-board">
+                <div class="builder-top">
+                  <div>
+                    <div class="builder-kicker">第二关：句子重组</div>
+                    <h2 class="builder-question" id="builderQuestion">目的</h2>
+                    <div class="builder-hint" id="builderHint">按正确顺序点击词块，把科学格式连成一句完整答案。</div>
+                  </div>
+                  <div class="builder-progress">
+                    关卡
+                    <span id="builderProgress">1 / 8</span>
+                  </div>
+                </div>
+
+                <div class="sentence-slots" id="sentenceSlots" aria-label="答案格子"></div>
+                <div class="token-bank" id="tokenBank" aria-label="词块"></div>
+
+                <div class="builder-actions">
+                  <button class="btn secondary" id="builderUndoBtn">撤回一个</button>
+                  <button class="btn secondary" id="builderClearBtn">清空</button>
+                  <button class="btn" id="builderCheckBtn">检查答案</button>
+                  <button class="btn" id="builderNextBtn" hidden>下一题</button>
+                </div>
+
+                <div class="builder-feedback" id="builderFeedback">先点下面的词块，把它们放到上面的格子里。</div>
+              </div>
+            </div>
+          </section>
+
           <section class="teacher-panel" id="studyPanel" hidden>
             <div class="mini-card"><b>1. 目的</b>为了研究操与反之间的关系</div>
             <div class="mini-card"><b>2. 操纵性定义</b>我们可以根据反来确定操</div>
@@ -2312,6 +2575,57 @@
       { id: "inference", title: "推断", answer: "为什么？" },
       { id: "observation", title: "观察结果", answer: "1 看 2 比 3 最" },
       { id: "trend", title: "变化形式", answer: "上升、下降、保持不变、增加、减少" }
+    ];
+
+    const builderChallenges = [
+      {
+        id: "aim",
+        title: "目的",
+        answerTokens: ["为了", "研究", "操", "与", "反", "之间的关系"],
+        distractors: ["观察", "一样", "为什么？"]
+      },
+      {
+        id: "opDef",
+        title: "操纵性定义",
+        answerTokens: ["我们可以", "根据", "反", "来确定", "操"],
+        distractors: ["为了", "之间的关系", "一样"]
+      },
+      {
+        id: "hypothesis",
+        title: "假设 / 之间的关系",
+        answerTokens: ["操", "越……", "反", "越……"],
+        distractors: ["为什么？", "观察", "不同"]
+      },
+      {
+        id: "variables",
+        title: "变数",
+        answerTokens: ["操纵性变数", "不同", "反应性变数", "观察", "固定性变数", "一样"],
+        distractors: ["为了", "最", "科学原理"]
+      },
+      {
+        id: "conclusion",
+        title: "结论",
+        answerTokens: ["科学原理", "/", "操", "越……", "反", "越……"],
+        distractors: ["为什么？", "观察", "一样"]
+      },
+      {
+        id: "inference",
+        title: "推断",
+        answerTokens: ["为什么", "？"],
+        distractors: ["为了", "研究", "最"]
+      },
+      {
+        id: "observation",
+        title: "观察结果",
+        answerTokens: ["1", "看", "2", "比", "3", "最"],
+        distractors: ["操", "反", "一样"]
+      },
+      {
+        id: "trend",
+        title: "变化形式",
+        answerTokens: ["上升", "下降", "保持不变", "增加", "减少"],
+        distractors: ["观察", "不同", "为什么？"]
+      }
     ];
 
     const quizQuestions = [
@@ -2368,7 +2682,8 @@
     ];
 
     const modeText = {
-      mission: ["一二三木头人", "娃娃背过去念口令；转回来眼睛发亮时，快点选出正确科学格式。"]
+      mission: ["一二三木头人", "娃娃背过去念口令；转回来眼睛发亮时，快点选出正确科学格式。"],
+      builder: ["连一连", "把词块按顺序连起来，重组成完整的科学实验格式。"]
     };
 
     const state = {
@@ -2392,6 +2707,10 @@
       quizIndex: 0,
       quizCorrect: 0,
       quizLocked: false,
+      builderIndex: 0,
+      builderSelected: [],
+      builderBank: [],
+      builderSolved: false,
       audioContext: null,
       bgmAudio: null,
       correctAudio: null,
@@ -2898,6 +3217,143 @@
       setMissionFeedback(message, "bad");
     }
 
+    function renderBuilder(resetAll = true) {
+      if (resetAll) state.builderIndex = 0;
+      startBuilderRound();
+    }
+
+    function startBuilderRound() {
+      const challenge = builderChallenges[state.builderIndex];
+      state.builderSelected = [];
+      state.builderSolved = false;
+      state.builderBank = shuffle([
+        ...challenge.answerTokens.map((label, index) => ({
+          id: `${challenge.id}-answer-${index}`,
+          label
+        })),
+        ...challenge.distractors.map((label, index) => ({
+          id: `${challenge.id}-extra-${index}`,
+          label
+        }))
+      ]);
+      el("builderNextBtn").hidden = true;
+      el("builderCheckBtn").hidden = false;
+      updateBuilderScreen();
+      setBuilderFeedback("先点下面的词块，把它们放到上面的格子里。", "");
+    }
+
+    function updateBuilderScreen() {
+      const challenge = builderChallenges[state.builderIndex];
+      el("builderQuestion").textContent = challenge.title;
+      el("builderProgress").textContent = `${state.builderIndex + 1} / ${builderChallenges.length}`;
+      el("builderHint").textContent = `目标：重组「${challenge.title}」的正确格式。`;
+
+      const slots = el("sentenceSlots");
+      slots.innerHTML = "";
+      challenge.answerTokens.forEach((_, index) => {
+        const slot = document.createElement("button");
+        const selected = state.builderSelected[index];
+        slot.className = `sentence-slot ${selected ? "filled" : ""}`;
+        slot.textContent = selected ? selected.label : index + 1;
+        slot.disabled = !selected || state.builderSolved;
+        slot.addEventListener("click", () => removeBuilderToken(index));
+        slots.appendChild(slot);
+      });
+
+      const used = new Set(state.builderSelected.map((token) => token.id));
+      const bank = el("tokenBank");
+      bank.innerHTML = "";
+      state.builderBank.forEach((token) => {
+        const button = document.createElement("button");
+        button.className = `word-token ${used.has(token.id) ? "used" : ""}`;
+        button.textContent = token.label;
+        button.disabled = used.has(token.id) || state.builderSolved;
+        button.addEventListener("click", () => addBuilderToken(token));
+        bank.appendChild(button);
+      });
+    }
+
+    function addBuilderToken(token) {
+      const challenge = builderChallenges[state.builderIndex];
+      if (state.builderSolved || state.builderSelected.length >= challenge.answerTokens.length) return;
+      state.builderSelected.push(token);
+      updateBuilderScreen();
+      setBuilderFeedback("继续连接词块，排好后按“检查答案”。", "");
+    }
+
+    function removeBuilderToken(index) {
+      if (state.builderSolved) return;
+      state.builderSelected.splice(index, 1);
+      updateBuilderScreen();
+      setBuilderFeedback("已撤回这个词块，可以重新选择。", "");
+    }
+
+    function undoBuilderToken() {
+      if (state.builderSolved) return;
+      state.builderSelected.pop();
+      updateBuilderScreen();
+      setBuilderFeedback("已撤回最后一个词块。", "");
+    }
+
+    function clearBuilderTokens() {
+      if (state.builderSolved) return;
+      state.builderSelected = [];
+      updateBuilderScreen();
+      setBuilderFeedback("已清空，重新连一次。", "");
+    }
+
+    function checkBuilderAnswer() {
+      const challenge = builderChallenges[state.builderIndex];
+      if (state.builderSelected.length < challenge.answerTokens.length) {
+        setBuilderFeedback("还没连完，先把上面的格子填满。", "bad");
+        playSoundEffect("wrong");
+        return;
+      }
+
+      const answer = state.builderSelected.map((token) => token.label);
+      const correct = answer.every((label, index) => label === challenge.answerTokens[index]);
+      if (!correct) {
+        setBuilderFeedback("顺序还不对。可以点上面的词块撤回，或按清空再试。", "bad");
+        playSoundEffect("wrong");
+        return;
+      }
+
+      state.builderSolved = true;
+      addScore(15);
+      playSoundEffect("correct");
+      updateBuilderScreen();
+
+      if (state.builderIndex >= builderChallenges.length - 1) {
+        addStar();
+        el("builderCheckBtn").hidden = true;
+        el("builderNextBtn").hidden = false;
+        el("builderNextBtn").textContent = "重新开始";
+        setBuilderFeedback("全部连对了！你完成第二关，得到 1 颗星。", "good");
+        toast("连一连完成！得到 1 颗星。");
+        return;
+      }
+
+      el("builderCheckBtn").hidden = true;
+      el("builderNextBtn").hidden = false;
+      el("builderNextBtn").textContent = "下一题";
+      setBuilderFeedback("连对了！按下一题继续。", "good");
+    }
+
+    function nextBuilderRound() {
+      if (state.builderIndex >= builderChallenges.length - 1) {
+        renderBuilder(true);
+        return;
+      }
+      state.builderIndex += 1;
+      startBuilderRound();
+    }
+
+    function setBuilderFeedback(message, type) {
+      const box = el("builderFeedback");
+      box.textContent = message;
+      box.className = `builder-feedback ${type}`;
+    }
+
     function renderMatch() {
       const termCards = el("termCards");
       const answerCards = el("answerCards");
@@ -3084,6 +3540,8 @@
         clearInterval(state.missionTimer);
         clearInterval(state.missionPhaseTimer);
         clearTimeout(state.missionPhaseTimer);
+        stopRedLightVideo();
+        stopMusic();
         state.missionStarted = false;
         state.missionLocked = true;
         state.missionPhase = "idle";
@@ -3095,10 +3553,17 @@
       el(`${mode}Mode`).classList.add("active");
       el("modeTitle").textContent = modeText[mode][0];
       el("modeNote").textContent = modeText[mode][1];
+      if (mode === "builder" && !state.builderBank.length) {
+        renderBuilder(true);
+      }
     }
 
     function resetMode() {
-      resetMission();
+      if (state.mode === "builder") {
+        renderBuilder(true);
+      } else {
+        resetMission();
+      }
     }
 
     document.querySelectorAll(".tab").forEach((tab) => {
@@ -3155,6 +3620,10 @@
     el("soundToggle").addEventListener("click", toggleMusic);
     el("resetBtn").addEventListener("click", resetMode);
     el("missionStartBtn").addEventListener("click", startMission);
+    el("builderUndoBtn").addEventListener("click", undoBuilderToken);
+    el("builderClearBtn").addEventListener("click", clearBuilderTokens);
+    el("builderCheckBtn").addEventListener("click", checkBuilderAnswer);
+    el("builderNextBtn").addEventListener("click", nextBuilderRound);
     el("studyBtn").addEventListener("click", () => {
       const panel = el("studyPanel");
       panel.hidden = !panel.hidden;
@@ -3163,6 +3632,7 @@
 
     window.addEventListener("resize", updateRunnerPosition);
     renderMission();
+    renderBuilder(true);
   </script>
 </body>
 </html>
