@@ -1212,6 +1212,78 @@
       font-weight: 800;
     }
 
+    .treasure-zone {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 71, 126, 0.28);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .treasure-zone h3 {
+      margin: 0 0 6px;
+      font-size: clamp(22px, 3vw, 34px);
+      color: var(--ink);
+    }
+
+    .treasure-zone p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .treasure-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .treasure-box {
+      min-height: 126px;
+      border-radius: 8px;
+      border: 2px solid #ff9bbc;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.42), transparent 38%),
+        linear-gradient(135deg, var(--pink), #ad1d4d);
+      color: white;
+      font-weight: 900;
+      display: grid;
+      place-items: center;
+      gap: 6px;
+      padding: 12px;
+      box-shadow: 0 14px 28px rgba(255, 71, 126, 0.26);
+      transition: transform 0.16s ease, filter 0.16s ease;
+    }
+
+    .treasure-box:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.06);
+    }
+
+    .treasure-box.opened {
+      background: linear-gradient(135deg, #fff4d6, #f7c948);
+      border-color: #ffe08a;
+      color: #3b2c13;
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .treasure-icon {
+      font-size: 40px;
+      line-height: 1;
+    }
+
+    .treasure-result {
+      min-height: 34px;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fff4d6;
+      border: 1px solid #ffe08a;
+      color: #3b2c13;
+      font-weight: 900;
+    }
+
     .match-grid {
       display: grid;
       grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
@@ -2390,6 +2462,10 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .treasure-grid {
+        grid-template-columns: 1fr;
+      }
+
       .finish-line {
         right: 12px;
         bottom: 298px;
@@ -2535,6 +2611,15 @@
                     <div class="level-kicker" id="levelKicker" hidden>LEVEL 1 CLEAR</div>
                     <h3 id="missionOverTitle">成功通关！</h3>
                     <p id="missionOverText">你已经完成所有科学格式关卡。</p>
+                    <div class="treasure-zone" id="levelOneTreasureZone" hidden>
+                      <h3>第一关奖励</h3>
+                      <p>打开宝藏后，再进入第二关。</p>
+                      <button class="treasure-box" id="levelOneTreasureBtn" data-reward="你获得「一二三木头人幸存者」称号！">
+                        <span class="treasure-icon">🎁</span>
+                        <span>打开宝藏</span>
+                      </button>
+                      <div class="treasure-result" id="levelOneTreasureResult">还没有打开宝藏。</div>
+                    </div>
                     <div class="level-countdown" id="levelCountdown" hidden>3</div>
                     <button class="btn" id="nextLevelBtn" hidden>进入下一关</button>
                   </div>
@@ -2587,6 +2672,25 @@
                 </div>
 
                 <div class="builder-feedback" id="builderFeedback">先点下面的词块，把它们放到上面的格子里。</div>
+                <div class="treasure-zone" id="squidTreasureZone" hidden>
+                  <h3>最终奖励：选择一个科学宝藏</h3>
+                  <p>你已经完成一二三木头人和句子重组。三个宝藏只能选一个。</p>
+                  <div class="treasure-grid">
+                    <button class="treasure-box" data-reward="你获得「科学格式守护者」称号！">
+                      <span class="treasure-icon">🎁</span>
+                      <span>宝藏 A</span>
+                    </button>
+                    <button class="treasure-box" data-reward="你获得「实验设计大师」称号！">
+                      <span class="treasure-icon">🎁</span>
+                      <span>宝藏 B</span>
+                    </button>
+                    <button class="treasure-box" data-reward="你获得「Newton Memory 挑战王」称号！">
+                      <span class="treasure-icon">🎁</span>
+                      <span>宝藏 C</span>
+                    </button>
+                  </div>
+                  <div class="treasure-result" id="squidTreasureResult">还没有打开宝藏。</div>
+                </div>
               </div>
             </div>
           </section>
@@ -3001,6 +3105,8 @@
       el("nextLevelBtn").hidden = true;
       el("levelKicker").hidden = true;
       el("levelCountdown").hidden = true;
+      el("levelOneTreasureZone").hidden = true;
+      resetLevelOneTreasure();
       el("missionStartBtn").textContent = "开始游戏";
       setArenaPhase("looking-away", "准备开始", "safe");
       setMissionPanelState("idle-panel");
@@ -3268,15 +3374,14 @@
       setMissionPanelState("idle-panel");
       stopRedLightVideo();
       el("levelKicker").hidden = false;
-      el("levelCountdown").hidden = false;
-      el("levelCountdown").textContent = "3";
+      el("levelCountdown").hidden = true;
+      resetLevelOneTreasure();
+      el("levelOneTreasureZone").hidden = false;
       el("missionOverTitle").textContent = "第二关解锁！";
-      el("missionOverText").textContent = "第一关完成。准备进入：连一连句子重组。";
+      el("missionOverText").textContent = "第一关完成。先打开奖励宝藏，再进入：连一连句子重组。";
       el("nextLevelBtn").hidden = false;
       el("missionOver").classList.add("show", "level-clear");
-      toast("一二三木头人通关！得到 1 颗星。");
-      startNextLevelCountdown();
-      state.nextLevelTimer = setTimeout(goNextLevel, 3000);
+      toast("一二三木头人通关！打开第一关奖励。");
     }
 
     function startNextLevelCountdown() {
@@ -3293,6 +3398,7 @@
       clearTimeout(state.nextLevelTimer);
       clearInterval(state.nextLevelCountdownTimer);
       el("missionOver").classList.remove("level-clear");
+      el("levelOneTreasureZone").hidden = true;
       setMode("builder");
       renderBuilder(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -3318,12 +3424,14 @@
       el("nextLevelBtn").hidden = true;
       el("levelKicker").hidden = true;
       el("levelCountdown").hidden = true;
+      el("levelOneTreasureZone").hidden = true;
       el("missionStartBtn").textContent = "重新开始";
       setMissionFeedback(message, "bad");
     }
 
     function renderBuilder(resetAll = true) {
       if (resetAll) state.builderIndex = 0;
+      resetSquidTreasure();
       startBuilderRound();
     }
 
@@ -3433,8 +3541,9 @@
         el("builderCheckBtn").hidden = true;
         el("builderNextBtn").hidden = false;
         el("builderNextBtn").textContent = "重新开始";
-        setBuilderFeedback("全部连对了！你完成第二关，得到 1 颗星。", "good");
-        toast("连一连完成！得到 1 颗星。");
+        el("squidTreasureZone").hidden = false;
+        setBuilderFeedback("全部连对了！你完成第二关，得到 1 颗星。现在选择一个最终宝藏。", "good");
+        toast("连一连完成！选择一个宝藏。");
         return;
       }
 
@@ -3451,6 +3560,50 @@
       }
       state.builderIndex += 1;
       startBuilderRound();
+    }
+
+    function resetSquidTreasure() {
+      const zone = el("squidTreasureZone");
+      if (!zone) return;
+      zone.hidden = true;
+      el("squidTreasureResult").textContent = "还没有打开宝藏。";
+      zone.querySelectorAll(".treasure-box").forEach((box) => {
+        box.disabled = false;
+        box.classList.remove("opened");
+        box.querySelector(".treasure-icon").textContent = "🎁";
+      });
+    }
+
+    function resetLevelOneTreasure() {
+      const zone = el("levelOneTreasureZone");
+      if (!zone) return;
+      el("levelOneTreasureResult").textContent = "还没有打开宝藏。";
+      const box = el("levelOneTreasureBtn");
+      box.disabled = false;
+      box.classList.remove("opened");
+      box.querySelector(".treasure-icon").textContent = "🎁";
+    }
+
+    function chooseLevelOneTreasure() {
+      const box = el("levelOneTreasureBtn");
+      box.disabled = true;
+      box.classList.add("opened");
+      box.querySelector(".treasure-icon").textContent = "🏆";
+      el("levelOneTreasureResult").textContent = box.dataset.reward;
+      playSoundEffect("correct");
+      toast("第一关宝藏打开了！");
+    }
+
+    function chooseSquidTreasure(box) {
+      const zone = el("squidTreasureZone");
+      zone.querySelectorAll(".treasure-box").forEach((item) => {
+        item.disabled = true;
+      });
+      box.classList.add("opened");
+      box.querySelector(".treasure-icon").textContent = "🏆";
+      el("squidTreasureResult").textContent = box.dataset.reward;
+      playSoundEffect("correct");
+      toast("科学宝藏打开了！");
     }
 
     function setBuilderFeedback(message, type) {
@@ -3740,6 +3893,10 @@
     el("builderClearBtn").addEventListener("click", clearBuilderTokens);
     el("builderCheckBtn").addEventListener("click", checkBuilderAnswer);
     el("builderNextBtn").addEventListener("click", nextBuilderRound);
+    el("levelOneTreasureBtn").addEventListener("click", chooseLevelOneTreasure);
+    document.querySelectorAll("#squidTreasureZone .treasure-box").forEach((box) => {
+      box.addEventListener("click", () => chooseSquidTreasure(box));
+    });
     el("studyBtn").addEventListener("click", () => {
       const panel = el("studyPanel");
       panel.hidden = !panel.hidden;
