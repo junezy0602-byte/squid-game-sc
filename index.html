@@ -573,6 +573,12 @@
         linear-gradient(0deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
       background-size: 44px 44px;
       pointer-events: none;
+      animation: gridDrift 16s linear infinite;
+    }
+
+    @keyframes gridDrift {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 88px 44px, 44px 88px; }
     }
 
     .mission-arena.alarm {
@@ -585,6 +591,10 @@
 
     .mission-arena.watching {
       box-shadow: inset 0 -80px 0 rgba(228, 63, 90, 0.32), 0 0 0 3px rgba(228, 63, 90, 0.22);
+    }
+
+    .mission-arena.watching::before {
+      animation-duration: 5s;
     }
 
     .mission-arena.flash-red {
@@ -704,6 +714,21 @@
       background: rgba(255, 71, 126, 0.28);
       border-color: #ff7aa5;
       animation: pulseGate 1.1s ease-in-out infinite;
+    }
+
+    .gate.done::after {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 8px;
+      border: 2px solid rgba(201, 255, 233, 0.45);
+      animation: gateUnlock 0.5s ease;
+      pointer-events: none;
+    }
+
+    @keyframes gateUnlock {
+      from { transform: scale(0.72); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     @keyframes pulseGate {
@@ -1063,6 +1088,15 @@
       font-weight: 900;
       line-height: 1.35;
       box-shadow: 0 5px 12px rgba(24, 50, 74, 0.08);
+      overflow: hidden;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      animation: answerRise 0.26s ease both;
+      animation-delay: calc(var(--choice-index, 0) * 70ms);
+    }
+
+    @keyframes answerRise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .door-choice::before {
@@ -1087,19 +1121,42 @@
       border-radius: 2px;
     }
 
+    .door-choice::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-120%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+      transition: transform 0.32s ease;
+      pointer-events: none;
+    }
+
     .door-choice:hover {
       border-color: var(--pink);
       transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(255, 71, 126, 0.16);
+    }
+
+    .door-choice:hover::after {
+      transform: translateX(120%);
     }
 
     .door-choice.correct {
       border-color: var(--green);
       background: #e8fbf2;
+      animation: correctBounce 0.38s ease both;
     }
 
     .door-choice.wrong {
       border-color: var(--red);
       background: #fff0f0;
+      animation: shake 0.24s linear;
+    }
+
+    @keyframes correctBounce {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.035); }
+      100% { transform: scale(1); }
     }
 
     .mission-feedback {
@@ -1254,6 +1311,25 @@
       padding: 12px;
       box-shadow: 0 14px 28px rgba(255, 71, 126, 0.26);
       transition: transform 0.16s ease, filter 0.16s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .treasure-box::before {
+      content: "";
+      position: absolute;
+      left: -30%;
+      top: -80%;
+      width: 60%;
+      height: 220%;
+      transform: rotate(18deg);
+      background: rgba(255, 255, 255, 0.32);
+      animation: treasureGleam 2.4s ease-in-out infinite;
+    }
+
+    @keyframes treasureGleam {
+      0%, 38% { transform: translateX(-160%) rotate(18deg); }
+      72%, 100% { transform: translateX(330%) rotate(18deg); }
     }
 
     .treasure-box:hover {
@@ -1269,8 +1345,17 @@
     }
 
     .treasure-icon {
-      font-size: 40px;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.55);
+      font-size: 28px;
       line-height: 1;
+      position: relative;
+      z-index: 1;
     }
 
     .treasure-result {
@@ -1282,6 +1367,391 @@
       border: 1px solid #ffe08a;
       color: #3b2c13;
       font-weight: 900;
+    }
+
+    .reward-dock {
+      margin-top: 18px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background:
+        linear-gradient(135deg, rgba(247, 201, 72, 0.14), rgba(39, 224, 163, 0.12)),
+        rgba(7, 21, 29, 0.82);
+      color: white;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .reward-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .reward-title {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .reward-note {
+      margin-top: 4px;
+      color: #b9d5d2;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .reward-progress {
+      min-width: 132px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .reward-progress span {
+      display: block;
+      color: var(--yellow);
+      font-size: 26px;
+      margin-top: 2px;
+    }
+
+    .reward-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+      gap: 10px;
+      padding: 16px 18px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reward-card {
+      min-height: 132px;
+      padding: 13px;
+      border-radius: 8px;
+      display: grid;
+      align-content: start;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.55);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reward-card.unlocked {
+      color: white;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08)),
+        rgba(255, 255, 255, 0.1);
+      border-color: rgba(247, 201, 72, 0.48);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    .reward-card.unlocked::before {
+      content: "";
+      position: absolute;
+      inset: -80% auto auto -40%;
+      width: 62%;
+      height: 220%;
+      transform: rotate(18deg);
+      background: rgba(255, 255, 255, 0.22);
+      animation: treasureGleam 3.2s ease-in-out infinite;
+    }
+
+    .reward-card.just-unlocked {
+      animation: rewardUnlock 0.6s ease both;
+    }
+
+    @keyframes rewardUnlock {
+      0% { transform: translateY(8px) scale(0.96); opacity: 0.3; }
+      55% { transform: translateY(-4px) scale(1.03); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .reward-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      border: 2px solid currentColor;
+      color: inherit;
+      font-size: 25px;
+      font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+
+    .reward-name,
+    .reward-desc,
+    .reward-rarity {
+      position: relative;
+      z-index: 1;
+    }
+
+    .reward-name {
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .reward-desc {
+      color: inherit;
+      opacity: 0.86;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .reward-rarity {
+      width: fit-content;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .reward-card.rare.unlocked {
+      border-color: rgba(39, 224, 163, 0.62);
+    }
+
+    .reward-card.epic.unlocked {
+      border-color: rgba(255, 71, 126, 0.62);
+    }
+
+    .reward-card.legendary.unlocked {
+      border-color: rgba(247, 201, 72, 0.78);
+    }
+
+    .insight-panel {
+      margin-top: 18px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .insight-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 18px;
+      background:
+        linear-gradient(90deg, rgba(39, 224, 163, 0.13), rgba(247, 201, 72, 0.14)),
+        white;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .insight-title {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .insight-note {
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .student-tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .student-input {
+      min-height: 42px;
+      width: min(220px, 100%);
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      padding: 9px 11px;
+      background: white;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .insight-body {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 16px;
+      padding: 16px 18px 18px;
+    }
+
+    .leaderboard,
+    .parent-report {
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #f7fffc;
+      padding: 14px;
+    }
+
+    .leaderboard h3,
+    .parent-report h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .leaderboard-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    .rank-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #fff0f6;
+      color: var(--pink);
+    }
+
+    .leaderboard-meta {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .leaderboard-empty {
+      padding: 12px;
+      border-radius: 8px;
+      background: white;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      font-weight: 800;
+    }
+
+    .report-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .report-metric {
+      padding: 10px;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    .report-metric span {
+      display: block;
+      margin-top: 4px;
+      color: var(--pink);
+      font-size: 22px;
+    }
+
+    .report-section {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid var(--line);
+      line-height: 1.45;
+    }
+
+    .report-section b {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .report-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .report-tag {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #fff4d6;
+      border: 1px solid #ffe08a;
+      color: #3b2c13;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: #16242b;
+      }
+
+      .topbar,
+      .tabs,
+      .game-shell,
+      .reward-dock,
+      .sound-toggle,
+      .celebration,
+      .intro-overlay,
+      .leaderboard,
+      .student-tools,
+      .controls {
+        display: none !important;
+      }
+
+      main {
+        width: 100%;
+        padding: 0;
+      }
+
+      .insight-panel {
+        box-shadow: none;
+        border: 0;
+        margin: 0;
+      }
+
+      .insight-head {
+        padding: 0 0 12px;
+      }
+
+      .insight-body {
+        display: block;
+        padding: 0;
+      }
+
+      .parent-report {
+        border: 0;
+        background: white;
+        padding: 0;
+      }
+
+      .print-only {
+        display: block;
+      }
     }
 
     .match-grid {
@@ -1643,6 +2113,12 @@
       border-color: #ffc2d6;
       color: var(--ink);
       box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+      animation: slotDrop 0.24s ease;
+    }
+
+    @keyframes slotDrop {
+      from { transform: translateY(-8px) scale(0.96); opacity: 0.45; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     .token-bank {
@@ -1705,6 +2181,240 @@
       animation: shake 0.24s linear;
     }
 
+    .mission-power {
+      display: none;
+      grid-column: 1 / -1;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      min-height: 48px;
+      background: #e8fff8;
+      color: #145a3b;
+      border-color: #9fe8d5;
+      box-shadow: 0 10px 24px rgba(39, 224, 163, 0.16);
+    }
+
+    .mission-panel.force-show .mission-power.available {
+      display: flex;
+    }
+
+    .mission-power:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .mission-arena.time-freeze {
+      box-shadow: inset 0 -80px 0 rgba(39, 224, 163, 0.28), 0 0 0 3px rgba(217, 255, 245, 0.35);
+      filter: saturate(1.12) brightness(1.08);
+    }
+
+    .builder-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 3;
+    }
+
+    .flip-game {
+      min-height: clamp(560px, calc(100vh - 250px), 760px);
+      padding: clamp(16px, 3vw, 28px);
+      border-radius: 0 0 8px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background:
+        radial-gradient(circle at 16% 12%, rgba(247, 201, 72, 0.2), transparent 28%),
+        radial-gradient(circle at 84% 18%, rgba(39, 224, 163, 0.18), transparent 30%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, #102836, #07151d);
+      background-size: auto, auto, 42px 42px, 42px 42px, auto;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flip-board {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 16px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .flip-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .flip-title {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 62px);
+      line-height: 1;
+      color: white;
+    }
+
+    .flip-kicker {
+      width: fit-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(247, 201, 72, 0.18);
+      border: 1px solid rgba(247, 201, 72, 0.46);
+      color: #fff4d6;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .flip-hint {
+      color: #b9d5d2;
+      font-weight: 800;
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    .flip-stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .flip-stat {
+      min-width: 108px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .flip-stat span {
+      display: block;
+      color: var(--yellow);
+      font-size: 24px;
+      margin-top: 3px;
+    }
+
+    .flip-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .flip-card {
+      min-height: 138px;
+      border-radius: 8px;
+      padding: 0;
+      background: transparent;
+      perspective: 900px;
+    }
+
+    .flip-card-inner {
+      display: block;
+      position: relative;
+      width: 100%;
+      min-height: 138px;
+      transform-style: preserve-3d;
+      transition: transform 0.44s cubic-bezier(.2, .72, .2, 1);
+    }
+
+    .flip-card.flipped .flip-card-inner,
+    .flip-card.matched .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      text-align: center;
+      backface-visibility: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.24);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+      font-weight: 900;
+      line-height: 1.28;
+    }
+
+    .flip-front {
+      background:
+        linear-gradient(135deg, rgba(255, 71, 126, 0.92), rgba(173, 29, 77, 0.92)),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.12) 0 9px, transparent 9px 18px);
+      color: white;
+      font-size: 30px;
+    }
+
+    .flip-front span {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      border: 3px solid rgba(255, 255, 255, 0.75);
+    }
+
+    .flip-back {
+      transform: rotateY(180deg);
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--ink);
+      font-size: clamp(13px, 1.2vw, 17px);
+    }
+
+    .flip-card.term .flip-back {
+      border-color: #ffc2d6;
+    }
+
+    .flip-card.answer .flip-back {
+      border-color: #9fe8d5;
+    }
+
+    .flip-card.matched .flip-back {
+      background: #e8fbf2;
+      border-color: var(--green);
+      color: #145a3b;
+    }
+
+    .flip-card.miss .flip-card-inner {
+      animation: shake 0.24s linear;
+    }
+
+    .flip-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .flip-feedback {
+      min-height: 34px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #d9fff5;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .flip-feedback.good {
+      background: rgba(25, 169, 116, 0.18);
+      border-color: rgba(25, 169, 116, 0.5);
+      color: #c9ffe9;
+    }
+
+    .flip-feedback.bad {
+      background: rgba(228, 63, 90, 0.18);
+      border-color: rgba(228, 63, 90, 0.52);
+      color: #ffd6e0;
+    }
+
+
     .mini-card {
       background: white;
       border: 1px solid var(--line);
@@ -1735,6 +2445,48 @@
 
     .celebration.show {
       transform: translateY(0);
+    }
+
+    .particle-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .spark {
+      position: absolute;
+      left: var(--spark-x, 50%);
+      top: var(--spark-y, 50%);
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--spark-color, var(--yellow));
+      box-shadow: 0 0 16px var(--spark-color, var(--yellow));
+      animation: sparkFly 0.78s ease-out forwards;
+      translate: -50% -50%;
+    }
+
+    @keyframes sparkFly {
+      from {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translate(var(--spark-dx, 0), var(--spark-dy, -60px)) scale(0.2);
+      }
+    }
+
+    .score-pop {
+      animation: scorePop 0.28s ease;
+    }
+
+    @keyframes scorePop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.18); color: var(--yellow); }
+      100% { transform: scale(1); }
     }
 
     /* Full-stage game mode overrides */
@@ -1831,6 +2583,131 @@
 
     .red-flash.active {
       animation: redFlashBurst 0.72s steps(2, end);
+    }
+
+    .scanner-line {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      top: 44%;
+      height: 3px;
+      z-index: 7;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 45, 94, 0.9), transparent);
+      box-shadow: 0 0 18px rgba(255, 45, 94, 0.9);
+      transform: translateY(-120px);
+    }
+
+    .mission-arena.watching .scanner-line {
+      opacity: 1;
+      animation: scanStage 1.2s ease-in-out infinite;
+    }
+
+    @keyframes scanStage {
+      0% { transform: translateY(-120px); opacity: 0.2; }
+      48%, 52% { opacity: 1; }
+      100% { transform: translateY(170px); opacity: 0.2; }
+    }
+
+    .stage-hud {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 86px;
+      z-index: 8;
+      display: grid;
+      grid-template-columns: auto minmax(160px, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .signal-stack,
+    .combo-badge,
+    .stage-meter {
+      border-radius: 8px;
+      background: rgba(7, 21, 29, 0.66);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(8px);
+      color: white;
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+    }
+
+    .signal-stack {
+      display: flex;
+      gap: 7px;
+      padding: 9px;
+    }
+
+    .signal-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .mission-arena.looking-away .signal-dot.safe {
+      background: var(--mint);
+      box-shadow: 0 0 16px rgba(39, 224, 163, 0.85);
+    }
+
+    .mission-arena.watching .signal-dot.danger {
+      background: var(--pink);
+      box-shadow: 0 0 16px rgba(255, 71, 126, 0.9);
+      animation: blinkText 0.32s linear infinite alternate;
+    }
+
+    .stage-meter {
+      min-height: 40px;
+      padding: 8px 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .stage-meter span {
+      color: #d9fff5;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .stage-meter-track {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .stage-meter-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--mint), var(--yellow), var(--pink));
+      transition: width 0.35s ease;
+    }
+
+    .combo-badge {
+      min-width: 112px;
+      padding: 9px 12px;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .combo-badge span {
+      color: var(--yellow);
+      font-size: 24px;
+      margin-left: 4px;
+    }
+
+    .combo-badge.combo-pop {
+      animation: comboPop 0.38s ease;
+    }
+
+    @keyframes comboPop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.14) rotate(-2deg); }
+      100% { transform: scale(1); }
     }
 
     @keyframes redFlashBurst {
@@ -2371,6 +3248,22 @@
         font-size: clamp(22px, 7vw, 34px);
       }
 
+      .stage-hud {
+        top: 74px;
+        left: 10px;
+        right: 10px;
+        grid-template-columns: auto 1fr;
+      }
+
+      .combo-badge {
+        min-width: 92px;
+        padding: 8px;
+      }
+
+      .stage-meter {
+        grid-column: 1 / -1;
+      }
+
       .mission-panel {
         left: 50%;
         right: auto;
@@ -2462,6 +3355,27 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .flip-top {
+        display: grid;
+      }
+
+      .flip-stats {
+        justify-content: stretch;
+      }
+
+      .flip-stat {
+        flex: 1;
+      }
+
+      .flip-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .flip-card,
+      .flip-card-inner {
+        min-height: 118px;
+      }
+
       .treasure-grid {
         grid-template-columns: 1fr;
       }
@@ -2542,6 +3456,7 @@
       <nav class="tabs" aria-label="游戏模式">
         <button class="tab active" data-mode="mission">一二三木头人</button>
         <button class="tab" data-mode="builder">连一连</button>
+        <button class="tab" data-mode="flip">翻牌挑战</button>
       </nav>
 
       <section class="game-shell">
@@ -2566,6 +3481,21 @@
                 </video>
                 <div class="video-fallback" id="redLightFallback">红灯阶段：娃娃正在看你</div>
                 <div class="red-flash" id="redFlash"></div>
+                <div class="scanner-line" aria-hidden="true"></div>
+                <div class="stage-hud" aria-hidden="true">
+                  <div class="signal-stack">
+                    <span class="signal-dot safe"></span>
+                    <span class="signal-dot danger"></span>
+                  </div>
+                  <div class="stage-meter">
+                    <span>记忆能量</span>
+                    <div class="stage-meter-track">
+                      <div class="stage-meter-fill" id="energyFill"></div>
+                    </div>
+                  </div>
+                  <div class="combo-badge" id="comboBadge">连击 <span id="missionCombo">0</span></div>
+                </div>
+                <div class="particle-layer" id="particleLayer" aria-hidden="true"></div>
                 <div class="phase-banner safe" id="phaseBanner">准备开始</div>
                 <div class="stage-characters" aria-hidden="true">
                   <div class="photo-actor real-guard left">
@@ -2614,8 +3544,8 @@
                     <div class="treasure-zone" id="levelOneTreasureZone" hidden>
                       <h3>第一关奖励</h3>
                       <p>打开宝藏后，再进入第二关。</p>
-                      <button class="treasure-box" id="levelOneTreasureBtn" data-reward="你获得「一二三木头人幸存者」称号！">
-                        <span class="treasure-icon">🎁</span>
+                      <button class="treasure-box" id="levelOneTreasureBtn" data-reward-id="survivor" data-reward="你获得「方块护盾」图案贴纸。">
+                        <span class="treasure-icon">◆</span>
                         <span>打开宝藏</span>
                       </button>
                       <div class="treasure-result" id="levelOneTreasureResult">还没有打开宝藏。</div>
@@ -2640,6 +3570,7 @@
                 </div>
 
                 <div class="door-choices" id="missionChoices"></div>
+                <button class="btn secondary mission-power" id="powerFreezeBtn">冻结时间 <span id="freezeCount">0</span></button>
                 <div class="mission-feedback" id="missionFeedback">按下开始，娃娃会先背过去念“一二三木头人”。</div>
                 <button class="btn" id="missionStartBtn">开始游戏</button>
               </div>
@@ -2648,6 +3579,7 @@
 
           <section class="mode" id="builderMode">
             <div class="builder-game">
+              <div class="builder-burst" id="builderBurst" aria-hidden="true"></div>
               <div class="builder-board">
                 <div class="builder-top">
                   <div>
@@ -2676,21 +3608,49 @@
                   <h3>最终奖励：选择一个科学宝藏</h3>
                   <p>你已经完成一二三木头人和句子重组。三个宝藏只能选一个。</p>
                   <div class="treasure-grid">
-                    <button class="treasure-box" data-reward="你获得「科学格式守护者」称号！">
-                      <span class="treasure-icon">🎁</span>
+                    <button class="treasure-box" data-reward-id="guardian" data-reward="你获得「圆形能量环」图案贴纸。">
+                      <span class="treasure-icon">◆</span>
                       <span>宝藏 A</span>
                     </button>
-                    <button class="treasure-box" data-reward="你获得「实验设计大师」称号！">
-                      <span class="treasure-icon">🎁</span>
+                    <button class="treasure-box" data-reward-id="designer" data-reward="你获得「三角闪电」图案贴纸。">
+                      <span class="treasure-icon">◆</span>
                       <span>宝藏 B</span>
                     </button>
-                    <button class="treasure-box" data-reward="你获得「Newton Memory 挑战王」称号！">
-                      <span class="treasure-icon">🎁</span>
+                    <button class="treasure-box" data-reward-id="memoryKing" data-reward="你获得「星形记忆核心」图案贴纸。">
+                      <span class="treasure-icon">◆</span>
                       <span>宝藏 C</span>
                     </button>
                   </div>
                   <div class="treasure-result" id="squidTreasureResult">还没有打开宝藏。</div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="mode" id="flipMode">
+            <div class="flip-game">
+              <div class="particle-layer" id="flipBurst" aria-hidden="true"></div>
+              <div class="flip-board">
+                <div class="flip-top">
+                  <div>
+                    <div class="flip-kicker">第三关：记忆翻牌</div>
+                    <h2 class="flip-title">找出格式配对</h2>
+                    <div class="flip-hint">翻开两张卡：一张题目，一张正确格式。配对成功就留下。</div>
+                  </div>
+                  <div class="flip-stats">
+                    <div class="flip-stat">配对 <span id="flipMatched">0 / 8</span></div>
+                    <div class="flip-stat">尝试 <span id="flipMoves">0</span></div>
+                    <div class="flip-stat">连击 <span id="flipStreak">0</span></div>
+                  </div>
+                </div>
+
+                <div class="flip-grid" id="flipGrid" aria-label="记忆翻牌"></div>
+
+                <div class="flip-actions">
+                  <button class="btn secondary" id="flipPeekBtn">偷看 2 秒</button>
+                  <button class="btn" id="flipResetBtn">重新洗牌</button>
+                </div>
+                <div class="flip-feedback" id="flipFeedback">先翻开一张题目卡，再找它对应的格式答案。</div>
               </div>
             </div>
           </section>
@@ -2705,6 +3665,59 @@
             <div class="mini-card"><b>7. 观察结果</b>1 看 2 比 3 最</div>
             <div class="mini-card"><b>8. 变化形式</b>上升、下降、保持不变、增加、减少</div>
           </section>
+        </div>
+      </section>
+
+      <section class="reward-dock" aria-label="奖励收藏册">
+        <div class="reward-head">
+          <div>
+            <div class="reward-title">图案贴纸收藏册</div>
+            <div class="reward-note">完成挑战、保持连击、快速答题或打开宝藏，就能解锁可爱/帅气的图案贴纸。</div>
+          </div>
+          <div class="reward-progress">
+            已解锁
+            <span id="rewardProgress">0 / 9</span>
+          </div>
+        </div>
+        <div class="reward-grid" id="rewardGrid"></div>
+      </section>
+
+      <section class="insight-panel" aria-label="排行榜和家长学习报告">
+        <div class="insight-head">
+          <div>
+            <div class="insight-title">排行榜与家长学习报告</div>
+            <div class="insight-note">输入学生名字后，可以保存本机排行榜，也可以打印一页学习表现报告。</div>
+          </div>
+          <div class="student-tools">
+            <input class="student-input" id="studentName" type="text" maxlength="18" placeholder="学生名字" />
+            <button class="btn secondary" id="saveRankBtn">保存成绩</button>
+            <button class="btn secondary" id="clearRankBtn">清空排行榜</button>
+            <button class="btn" id="printReportBtn">打印报告</button>
+          </div>
+        </div>
+        <div class="insight-body">
+          <div class="leaderboard">
+            <h3>本机排行榜</h3>
+            <div class="leaderboard-list" id="leaderboardList"></div>
+          </div>
+          <div class="parent-report" id="parentReport">
+            <h3>家长学习报告</h3>
+            <div class="print-only" id="printDate"></div>
+            <div class="report-summary">
+              <div class="report-metric">分数 <span id="reportScore">0</span></div>
+              <div class="report-metric">星星 <span id="reportStars">0</span></div>
+              <div class="report-metric">图案 <span id="reportRewards">0 / 9</span></div>
+            </div>
+            <div class="report-section">
+              <b>学习表现</b>
+              <div id="reportPerformance">还未开始记录。完成挑战后，这里会自动生成表现说明。</div>
+              <div class="report-tags" id="reportTags"></div>
+            </div>
+            <div class="report-section">
+              <b>给家长的建议</b>
+              <div id="reportAdvice">建议先玩第一关，熟悉科学格式关键词。</div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -2852,8 +3865,21 @@
 
     const modeText = {
       mission: ["一二三木头人", "娃娃背过去念口令；转回来眼睛发亮时，快点选出正确科学格式。"],
-      builder: ["连一连", "把词块按顺序连起来，重组成完整的科学实验格式。"]
+      builder: ["连一连", "把词块按顺序连起来，重组成完整的科学实验格式。"],
+      flip: ["翻牌挑战", "翻开题目和答案，把科学格式配成一对。记住位置会更快通关。"]
     };
+
+    const rewardCatalog = [
+      { id: "firstStep", name: "小圆起跑贴纸", desc: "第一关答对第 1 题。", mark: "○", rarity: "common", label: "可爱" },
+      { id: "combo3", name: "三角专注贴纸", desc: "一二三木头人连续答对 3 题。", mark: "△", rarity: "rare", label: "帅气" },
+      { id: "speedRunner", name: "菱形闪速贴纸", desc: "红灯阶段 6 秒以上答对。", mark: "◇", rarity: "rare", label: "帅气" },
+      { id: "survivor", name: "方块护盾贴纸", desc: "完成第一关并打开宝藏。", mark: "□", rarity: "epic", label: "特别" },
+      { id: "sentenceMaster", name: "组合积木贴纸", desc: "第二关连对任意 1 题。", mark: "▣", rarity: "common", label: "可爱" },
+      { id: "builderStreak", name: "连线光束贴纸", desc: "第二关连续连对 3 题。", mark: "◇", rarity: "rare", label: "帅气" },
+      { id: "guardian", name: "圆形能量环贴纸", desc: "选择最终宝藏 A。", mark: "○", rarity: "epic", label: "特别" },
+      { id: "designer", name: "三角闪电贴纸", desc: "选择最终宝藏 B。", mark: "△", rarity: "epic", label: "特别" },
+      { id: "memoryKing", name: "星形记忆核心贴纸", desc: "选择最终宝藏 C，或完成翻牌挑战。", mark: "★", rarity: "legendary", label: "稀有图案" }
+    ];
 
     const state = {
       score: 0,
@@ -2871,6 +3897,15 @@
       missionPhase: "idle",
       missionPenaltyLocked: false,
       missionWon: false,
+      missionCombo: 0,
+      freezeTokens: 0,
+      builderStreak: 0,
+      flipCards: [],
+      flipOpen: [],
+      flipMatched: new Set(),
+      flipMoves: 0,
+      flipStreak: 0,
+      flipLocked: false,
       selectedTerm: null,
       selectedAnswer: null,
       matched: new Set(),
@@ -2888,7 +3923,13 @@
       wrongAudio: null,
       musicOn: false,
       soundEnabled: true,
-      musicNodes: []
+      musicNodes: [],
+      unlockedRewards: new Set(),
+      leaderboard: [],
+      maxMissionCombo: 0,
+      maxBuilderStreak: 0,
+      bestFlipMatches: 0,
+      bestFlipMoves: 0
     };
 
     const el = (id) => document.getElementById(id);
@@ -3050,12 +4091,22 @@
 
     function addScore(points) {
       state.score += points;
-      el("score").textContent = state.score;
+      const score = el("score");
+      score.textContent = state.score;
+      score.classList.remove("score-pop");
+      void score.offsetWidth;
+      score.classList.add("score-pop");
+      renderParentReport();
     }
 
     function addStar() {
       state.stars += 1;
-      el("stars").textContent = state.stars;
+      const stars = el("stars");
+      stars.textContent = state.stars;
+      stars.classList.remove("score-pop");
+      void stars.offsetWidth;
+      stars.classList.add("score-pop");
+      renderParentReport();
     }
 
     function toast(message) {
@@ -3064,6 +4115,199 @@
       box.classList.add("show");
       clearTimeout(toast.timer);
       toast.timer = setTimeout(() => box.classList.remove("show"), 1800);
+    }
+
+    function loadRewards() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("science-format-rewards") || "[]");
+        state.unlockedRewards = new Set(saved.filter((id) => rewardCatalog.some((reward) => reward.id === id)));
+      } catch {
+        state.unlockedRewards = new Set();
+      }
+      renderRewards();
+    }
+
+    function saveRewards() {
+      localStorage.setItem("science-format-rewards", JSON.stringify([...state.unlockedRewards]));
+    }
+
+    function unlockReward(id) {
+      const reward = rewardCatalog.find((item) => item.id === id);
+      if (!reward || state.unlockedRewards.has(id)) return;
+      state.unlockedRewards.add(id);
+      saveRewards();
+      renderRewards(id);
+      toast(`图案解锁：${reward.name}`);
+      createSparkBurst("rewardGrid", 20, 50, 50);
+      playTone(740, 0.12, "triangle", 0.06);
+      setTimeout(() => playTone(980, 0.16, "triangle", 0.05), 110);
+      renderParentReport();
+    }
+
+    function renderRewards(highlightId = "") {
+      const grid = el("rewardGrid");
+      const progress = el("rewardProgress");
+      if (!grid || !progress) return;
+      progress.textContent = `${state.unlockedRewards.size} / ${rewardCatalog.length}`;
+      grid.innerHTML = "";
+      rewardCatalog.forEach((reward) => {
+        const unlocked = state.unlockedRewards.has(reward.id);
+        const card = document.createElement("div");
+        card.className = `reward-card ${reward.rarity} ${unlocked ? "unlocked" : ""} ${highlightId === reward.id ? "just-unlocked" : ""}`;
+        card.innerHTML = `
+          <div class="reward-mark">${unlocked ? reward.mark : "?"}</div>
+          <div class="reward-name">${unlocked ? reward.name : "未解锁奖励"}</div>
+          <div class="reward-desc">${reward.desc}</div>
+          <div class="reward-rarity">${reward.label}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function loadLeaderboard() {
+      try {
+        state.leaderboard = JSON.parse(localStorage.getItem("science-format-leaderboard") || "[]")
+          .filter((entry) => entry && entry.name && Number.isFinite(entry.score))
+          .slice(0, 10);
+      } catch {
+        state.leaderboard = [];
+      }
+      renderLeaderboard();
+    }
+
+    function saveLeaderboard() {
+      localStorage.setItem("science-format-leaderboard", JSON.stringify(state.leaderboard));
+    }
+
+    function saveCurrentScore() {
+      const input = el("studentName");
+      const name = (input.value || "学生").trim().slice(0, 18);
+      input.value = name;
+      const entry = {
+        name,
+        score: state.score,
+        stars: state.stars,
+        rewards: state.unlockedRewards.size,
+        date: new Date().toLocaleDateString("zh-Hans")
+      };
+      state.leaderboard = [...state.leaderboard, entry]
+        .sort((a, b) => b.score - a.score || b.stars - a.stars || b.rewards - a.rewards)
+        .slice(0, 10);
+      saveLeaderboard();
+      renderLeaderboard();
+      renderParentReport();
+      toast("成绩已保存到本机排行榜。");
+    }
+
+    function clearLeaderboard() {
+      state.leaderboard = [];
+      saveLeaderboard();
+      renderLeaderboard();
+      toast("本机排行榜已清空。");
+    }
+
+    function renderLeaderboard() {
+      const list = el("leaderboardList");
+      if (!list) return;
+      if (!state.leaderboard.length) {
+        list.innerHTML = `<div class="leaderboard-empty">还没有保存成绩。完成一轮后，输入名字并保存。</div>`;
+        return;
+      }
+      list.innerHTML = "";
+      state.leaderboard.forEach((entry, index) => {
+        const row = document.createElement("div");
+        row.className = "leaderboard-row";
+        row.innerHTML = `
+          <div class="rank-badge">${index + 1}</div>
+          <div>
+            <div>${entry.name}</div>
+            <div class="leaderboard-meta">${entry.date} · 星星 ${entry.stars} · 图案 ${entry.rewards}</div>
+          </div>
+          <div>${entry.score}</div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function renderParentReport() {
+      const reportScore = el("reportScore");
+      if (!reportScore) return;
+      const name = (el("studentName").value || "学生").trim() || "学生";
+      const rewardCount = state.unlockedRewards.size;
+      reportScore.textContent = state.score;
+      el("reportStars").textContent = state.stars;
+      el("reportRewards").textContent = `${rewardCount} / ${rewardCatalog.length}`;
+      el("printDate").textContent = `${name} · ${new Date().toLocaleDateString("zh-Hans")}`;
+
+      const strengths = [];
+      if (state.maxMissionCombo >= 3) strengths.push("专注反应稳定，能连续答对红灯题。");
+      if (state.maxBuilderStreak >= 3) strengths.push("能把科学格式词块按正确顺序重组。");
+      if (state.bestFlipMatches >= 4) strengths.push("记忆位置和配对能力表现良好。");
+      if (state.unlockedRewards.has("speedRunner")) strengths.push("答题速度快，能在短时间内回忆格式。");
+      if (!strengths.length && state.score > 0) strengths.push("已开始熟悉科学格式关键词。");
+      if (!strengths.length) strengths.push("尚未完成挑战，建议先从第一关开始。");
+
+      const advice = [];
+      if (!state.unlockedRewards.has("firstStep")) advice.push("先练习「目的」和「操纵性定义」两个基础格式。");
+      if (state.maxMissionCombo < 3) advice.push("可让孩子重复第一关，训练专注和快速回忆。");
+      if (state.maxBuilderStreak < 3) advice.push("建议用格式表复习句子顺序，再挑战第二关。");
+      if (state.bestFlipMatches < 4) advice.push("可用翻牌挑战练习位置记忆和答案配对。");
+      if (!advice.length) advice.push("孩子已经掌握不少格式，可以尝试限时完成或向家长口头解释每个格式。");
+
+      el("reportPerformance").textContent = strengths.join(" ");
+      el("reportAdvice").textContent = advice.join(" ");
+
+      const tags = [
+        `最高红灯连击 ${state.maxMissionCombo}`,
+        `句子连对 ${state.maxBuilderStreak}`,
+        `翻牌配对 ${state.bestFlipMatches}/8`,
+        `图案 ${rewardCount}`
+      ];
+      el("reportTags").innerHTML = tags.map((tag) => `<span class="report-tag">${tag}</span>`).join("");
+    }
+
+    function updateMissionEnergy() {
+      const fill = el("energyFill");
+      if (!fill) return;
+      const progress = formatItems.length ? (state.missionIndex / formatItems.length) * 100 : 0;
+      fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+      const combo = el("missionCombo");
+      const badge = el("comboBadge");
+      if (combo && badge) {
+        combo.textContent = state.missionCombo;
+        badge.classList.remove("combo-pop");
+        void badge.offsetWidth;
+        if (state.missionCombo > 0) badge.classList.add("combo-pop");
+      }
+      updatePowerButton();
+    }
+
+    function updatePowerButton() {
+      const button = el("powerFreezeBtn");
+      const count = el("freezeCount");
+      if (!button || !count) return;
+      count.textContent = state.freezeTokens;
+      button.classList.toggle("available", state.freezeTokens > 0);
+      button.disabled = state.freezeTokens <= 0 || state.missionLocked || state.missionPhase !== "watch";
+    }
+
+    function createSparkBurst(containerId, amount = 18, originX = 50, originY = 50) {
+      const layer = el(containerId);
+      if (!layer) return;
+      const colors = ["#f7c948", "#27e0a3", "#ff477e", "#ffffff"];
+      for (let i = 0; i < amount; i++) {
+        const spark = document.createElement("span");
+        spark.className = "spark";
+        const angle = (Math.PI * 2 * i) / amount + Math.random() * 0.45;
+        const distance = 48 + Math.random() * 74;
+        spark.style.setProperty("--spark-x", `${originX}%`);
+        spark.style.setProperty("--spark-y", `${originY}%`);
+        spark.style.setProperty("--spark-dx", `${Math.cos(angle) * distance}px`);
+        spark.style.setProperty("--spark-dy", `${Math.sin(angle) * distance}px`);
+        spark.style.setProperty("--spark-color", colors[i % colors.length]);
+        layer.appendChild(spark);
+        spark.addEventListener("animationend", () => spark.remove(), { once: true });
+      }
     }
 
     function setFeedback(id, message, type = "") {
@@ -3100,6 +4344,9 @@
       state.missionPhase = "idle";
       state.missionPenaltyLocked = false;
       state.missionWon = false;
+      state.missionCombo = 0;
+      state.freezeTokens = 0;
+      el("missionArena").classList.remove("time-freeze");
       el("missionOver").classList.remove("show");
       el("missionOver").classList.remove("level-clear");
       el("nextLevelBtn").hidden = true;
@@ -3112,6 +4359,7 @@
       setMissionPanelState("idle-panel");
       updateMissionScreen();
       setMissionFeedback("按下开始，娃娃会先背过去念“一二三木头人”。", "");
+      updateMissionEnergy();
       setTimeout(updateRunnerPosition, 40);
     }
 
@@ -3234,6 +4482,7 @@
       playTone(520, 0.12, "sawtooth", 0.08);
       setTimeout(() => playTone(740, 0.14, "sawtooth", 0.07), 90);
       updateMissionScreen();
+      updatePowerButton();
       setMissionFeedback("娃娃转过来了，眼睛发光！快点选正确格式。", "bad");
 
       state.missionTimer = setInterval(() => {
@@ -3256,6 +4505,7 @@
       el("missionHint").textContent = state.missionPhase === "watch"
         ? `题目：选出「${current.title}」的正确科学格式。`
         : "先准备答案，娃娃转回来时才可以点。";
+      updateMissionEnergy();
 
       document.querySelectorAll(".gate").forEach((gate, index) => {
         gate.classList.toggle("done", index < state.missionIndex);
@@ -3264,10 +4514,11 @@
 
       const choices = el("missionChoices");
       choices.innerHTML = "";
-      pickMissionChoices(current).forEach((choice) => {
+      pickMissionChoices(current).forEach((choice, index) => {
         const button = document.createElement("button");
         button.className = "door-choice";
         button.textContent = choice;
+        button.style.setProperty("--choice-index", index);
         button.disabled = state.missionLocked || state.missionWon || state.missionPhase !== "watch";
         button.addEventListener("click", () => answerMission(button, choice));
         choices.appendChild(button);
@@ -3294,16 +4545,30 @@
 
       if (correct) {
         button.classList.add("correct");
-        addScore(20);
+        state.missionCombo += 1;
+        state.maxMissionCombo = Math.max(state.maxMissionCombo, state.missionCombo);
+        unlockReward("firstStep");
+        if (state.missionTime >= 6) unlockReward("speedRunner");
+        if (state.missionCombo > 0 && state.missionCombo % 3 === 0) {
+          state.freezeTokens = Math.min(2, state.freezeTokens + 1);
+          unlockReward("combo3");
+          toast("连击奖励：获得 1 次冻结时间。");
+        }
+        const comboBonus = state.missionCombo >= 3 ? 5 : 0;
+        const speedBonus = state.missionTime >= 6 ? 8 : state.missionTime >= 4 ? 4 : 0;
+        addScore(20 + comboBonus + speedBonus);
         state.missionIndex += 1;
-        setMissionFeedback("答对！娃娃转回去，学生前进一格。", "good");
+        setMissionFeedback(comboBonus || speedBonus ? `答对！连击 ${state.missionCombo}，速度奖励 ${speedBonus} 分。` : "答对！娃娃转回去，学生前进一格。", "good");
         stopRedLightVideo();
         playSoundEffect("correct");
         playTone(660, 0.14, "sine", 0.08);
         setTimeout(() => playTone(880, 0.15, "sine", 0.07), 100);
+        createSparkBurst("particleLayer", state.missionCombo >= 3 ? 28 : 18, 46, 58);
         el("runner").classList.add("jump");
         setTimeout(() => el("runner").classList.remove("jump"), 220);
         setArenaPhase("looking-away", "安全，前进", "safe");
+        updateMissionEnergy();
+        renderParentReport();
         updateRunnerPosition();
 
         if (state.missionIndex >= formatItems.length) {
@@ -3316,8 +4581,23 @@
         }, 900);
       } else {
         button.classList.add("wrong");
+        state.missionCombo = 0;
+        updateMissionEnergy();
         loseMissionStar(`答错！正确格式是：${current.answer}`);
       }
+    }
+
+    function useFreezePower() {
+      if (state.freezeTokens <= 0 || state.missionLocked || state.missionPhase !== "watch") return;
+      state.freezeTokens -= 1;
+      state.missionTime = Math.min(12, state.missionTime + 3);
+      el("missionTime").textContent = state.missionTime;
+      el("missionArena").classList.add("time-freeze");
+      setMissionFeedback("冻结时间启动！多给你 3 秒，稳住再选。", "good");
+      playTone(420, 0.12, "triangle", 0.07);
+      setTimeout(() => playTone(620, 0.16, "triangle", 0.06), 120);
+      setTimeout(() => el("missionArena").classList.remove("time-freeze"), 1200);
+      updatePowerButton();
     }
 
     function loseMissionStar(message) {
@@ -3326,6 +4606,7 @@
       clearInterval(state.missionTimer);
       state.missionLocked = true;
       state.missionLives = Math.max(0, state.missionLives - 1);
+      state.missionCombo = 0;
       el("missionArena").classList.add("alarm");
       setTimeout(() => el("missionArena").classList.remove("alarm"), 700);
       playSoundEffect("wrong");
@@ -3333,6 +4614,7 @@
       setTimeout(() => playTone(95, 0.24, "square", 0.08), 120);
       setMissionFeedback(`${message} 还剩 ${Math.max(state.missionLives, 0)} 颗星。`, "bad");
       updateMissionScreen();
+      updateMissionEnergy();
 
       if (state.missionLives <= 0) {
         setTimeout(() => failMission("星星用完了！先看格式表，再重新挑战。"), 750);
@@ -3373,6 +4655,8 @@
       setArenaPhase("looking-away", "通关成功", "safe");
       setMissionPanelState("idle-panel");
       stopRedLightVideo();
+      createSparkBurst("particleLayer", 42, 50, 46);
+      updateMissionEnergy();
       el("levelKicker").hidden = false;
       el("levelCountdown").hidden = true;
       resetLevelOneTreasure();
@@ -3431,6 +4715,7 @@
 
     function renderBuilder(resetAll = true) {
       if (resetAll) state.builderIndex = 0;
+      state.builderStreak = 0;
       resetSquidTreasure();
       startBuilderRound();
     }
@@ -3526,15 +4811,23 @@
       const answer = state.builderSelected.map((token) => token.label);
       const correct = answer.every((label, index) => label === challenge.answerTokens[index]);
       if (!correct) {
+        state.builderStreak = 0;
         setBuilderFeedback("顺序还不对。可以点上面的词块撤回，或按清空再试。", "bad");
         playSoundEffect("wrong");
         return;
       }
 
       state.builderSolved = true;
-      addScore(15);
+      state.builderStreak += 1;
+      state.maxBuilderStreak = Math.max(state.maxBuilderStreak, state.builderStreak);
+      unlockReward("sentenceMaster");
+      if (state.builderStreak >= 3) unlockReward("builderStreak");
+      const streakBonus = state.builderStreak >= 3 ? 5 : 0;
+      addScore(15 + streakBonus);
       playSoundEffect("correct");
+      createSparkBurst("builderBurst", state.builderStreak >= 3 ? 26 : 16, 50, 56);
       updateBuilderScreen();
+      renderParentReport();
 
       if (state.builderIndex >= builderChallenges.length - 1) {
         addStar();
@@ -3550,7 +4843,7 @@
       el("builderCheckBtn").hidden = true;
       el("builderNextBtn").hidden = false;
       el("builderNextBtn").textContent = "下一题";
-      setBuilderFeedback("连对了！按下一题继续。", "good");
+      setBuilderFeedback(streakBonus ? `连对了！连续 ${state.builderStreak} 题，额外加 ${streakBonus} 分。` : "连对了！按下一题继续。", "good");
     }
 
     function nextBuilderRound() {
@@ -3570,7 +4863,7 @@
       zone.querySelectorAll(".treasure-box").forEach((box) => {
         box.disabled = false;
         box.classList.remove("opened");
-        box.querySelector(".treasure-icon").textContent = "🎁";
+        box.querySelector(".treasure-icon").textContent = "◆";
       });
     }
 
@@ -3581,16 +4874,18 @@
       const box = el("levelOneTreasureBtn");
       box.disabled = false;
       box.classList.remove("opened");
-      box.querySelector(".treasure-icon").textContent = "🎁";
+      box.querySelector(".treasure-icon").textContent = "◆";
     }
 
     function chooseLevelOneTreasure() {
       const box = el("levelOneTreasureBtn");
       box.disabled = true;
       box.classList.add("opened");
-      box.querySelector(".treasure-icon").textContent = "🏆";
+      box.querySelector(".treasure-icon").textContent = "★";
       el("levelOneTreasureResult").textContent = box.dataset.reward;
       playSoundEffect("correct");
+      createSparkBurst("particleLayer", 34, 50, 54);
+      unlockReward(box.dataset.rewardId);
       toast("第一关宝藏打开了！");
     }
 
@@ -3600,9 +4895,11 @@
         item.disabled = true;
       });
       box.classList.add("opened");
-      box.querySelector(".treasure-icon").textContent = "🏆";
+      box.querySelector(".treasure-icon").textContent = "★";
       el("squidTreasureResult").textContent = box.dataset.reward;
       playSoundEffect("correct");
+      createSparkBurst("builderBurst", 34, 50, 62);
+      unlockReward(box.dataset.rewardId);
       toast("科学宝藏打开了！");
     }
 
@@ -3610,6 +4907,133 @@
       const box = el("builderFeedback");
       box.textContent = message;
       box.className = `builder-feedback ${type}`;
+    }
+
+    function renderFlip() {
+      state.flipCards = shuffle(formatItems.flatMap((item) => [
+        {
+          uid: `${item.id}-term`,
+          pairId: item.id,
+          type: "term",
+          front: "◇",
+          label: item.title,
+          tag: "题目"
+        },
+        {
+          uid: `${item.id}-answer`,
+          pairId: item.id,
+          type: "answer",
+          front: "◆",
+          label: item.answer,
+          tag: "格式"
+        }
+      ]));
+      state.flipOpen = [];
+      state.flipMatched = new Set();
+      state.flipMoves = 0;
+      state.flipStreak = 0;
+      state.flipLocked = false;
+      updateFlipScreen();
+      setFlipFeedback("先翻开一张题目卡，再找它对应的格式答案。", "");
+    }
+
+    function updateFlipScreen() {
+      el("flipMatched").textContent = `${state.flipMatched.size} / ${formatItems.length}`;
+      el("flipMoves").textContent = state.flipMoves;
+      el("flipStreak").textContent = state.flipStreak;
+
+      const grid = el("flipGrid");
+      grid.innerHTML = "";
+      state.flipCards.forEach((card) => {
+        const isOpen = state.flipOpen.includes(card.uid);
+        const isMatched = state.flipMatched.has(card.pairId);
+        const button = document.createElement("button");
+        button.className = `flip-card ${card.type} ${isOpen ? "flipped" : ""} ${isMatched ? "matched" : ""}`;
+        button.disabled = state.flipLocked || isMatched;
+        button.innerHTML = `
+          <span class="flip-card-inner">
+            <span class="flip-face flip-front"><span>${card.front}</span></span>
+            <span class="flip-face flip-back">${card.tag}<br>${card.label}</span>
+          </span>
+        `;
+        button.addEventListener("click", () => flipCard(card.uid));
+        grid.appendChild(button);
+      });
+    }
+
+    function flipCard(uid) {
+      if (state.flipLocked || state.flipOpen.includes(uid)) return;
+      const card = state.flipCards.find((item) => item.uid === uid);
+      if (!card || state.flipMatched.has(card.pairId)) return;
+      state.flipOpen.push(uid);
+      updateFlipScreen();
+      playTone(420 + state.flipOpen.length * 90, 0.08, "triangle", 0.04);
+
+      if (state.flipOpen.length < 2) {
+        setFlipFeedback("记住这张卡的位置，再翻一张来配对。", "");
+        return;
+      }
+
+      state.flipLocked = true;
+      state.flipMoves += 1;
+      const [firstUid, secondUid] = state.flipOpen;
+      const first = state.flipCards.find((item) => item.uid === firstUid);
+      const second = state.flipCards.find((item) => item.uid === secondUid);
+      const matched = first && second && first.pairId === second.pairId && first.type !== second.type;
+
+      if (matched) {
+        state.flipMatched.add(first.pairId);
+        state.flipStreak += 1;
+        state.bestFlipMatches = Math.max(state.bestFlipMatches, state.flipMatched.size);
+        state.bestFlipMoves = state.flipMoves;
+        const streakBonus = state.flipStreak >= 3 ? 4 : 0;
+        addScore(8 + streakBonus);
+        playSoundEffect("correct");
+        createSparkBurst("flipBurst", state.flipStreak >= 3 ? 24 : 14, 50, 56);
+        state.flipOpen = [];
+        state.flipLocked = false;
+        updateFlipScreen();
+        renderParentReport();
+
+        if (state.flipMatched.size >= formatItems.length) {
+          addStar();
+          unlockReward("memoryKing");
+          setFlipFeedback(`全部配对成功！你用了 ${state.flipMoves} 次尝试，获得 1 颗星。`, "good");
+          toast("翻牌挑战完成！记忆位置很稳。");
+          return;
+        }
+
+        setFlipFeedback(streakBonus ? `配对成功！连续 ${state.flipStreak} 组，额外加 ${streakBonus} 分。` : "配对成功！继续找下一组。", "good");
+        return;
+      }
+
+      state.flipStreak = 0;
+      setFlipFeedback("这两张不是一对，记住它们的位置，再试一次。", "bad");
+      playSoundEffect("wrong");
+      document.querySelectorAll(".flip-card.flipped").forEach((button) => button.classList.add("miss"));
+      setTimeout(() => {
+        state.flipOpen = [];
+        state.flipLocked = false;
+        updateFlipScreen();
+      }, 820);
+    }
+
+    function peekFlipCards() {
+      if (state.flipLocked) return;
+      state.flipLocked = true;
+      document.querySelectorAll(".flip-card:not(.matched)").forEach((button) => button.classList.add("flipped"));
+      setFlipFeedback("偷看中：记住题目和格式的位置。", "good");
+      setTimeout(() => {
+        state.flipLocked = false;
+        updateFlipScreen();
+        setFlipFeedback("偷看结束。现在靠记忆配对。", "");
+      }, 2000);
+    }
+
+    function setFlipFeedback(message, type) {
+      const box = el("flipFeedback");
+      box.textContent = message;
+      box.className = `flip-feedback ${type}`;
     }
 
     function renderMatch() {
@@ -3814,11 +5238,16 @@
       if (mode === "builder" && !state.builderBank.length) {
         renderBuilder(true);
       }
+      if (mode === "flip" && !state.flipCards.length) {
+        renderFlip();
+      }
     }
 
     function resetMode() {
       if (state.mode === "builder") {
         renderBuilder(true);
+      } else if (state.mode === "flip") {
+        renderFlip();
       } else {
         resetMission();
       }
@@ -3893,6 +5322,16 @@
     el("builderClearBtn").addEventListener("click", clearBuilderTokens);
     el("builderCheckBtn").addEventListener("click", checkBuilderAnswer);
     el("builderNextBtn").addEventListener("click", nextBuilderRound);
+    el("powerFreezeBtn").addEventListener("click", useFreezePower);
+    el("flipResetBtn").addEventListener("click", renderFlip);
+    el("flipPeekBtn").addEventListener("click", peekFlipCards);
+    el("saveRankBtn").addEventListener("click", saveCurrentScore);
+    el("clearRankBtn").addEventListener("click", clearLeaderboard);
+    el("printReportBtn").addEventListener("click", () => {
+      renderParentReport();
+      window.print();
+    });
+    el("studentName").addEventListener("input", renderParentReport);
     el("levelOneTreasureBtn").addEventListener("click", chooseLevelOneTreasure);
     document.querySelectorAll("#squidTreasureZone .treasure-box").forEach((box) => {
       box.addEventListener("click", () => chooseSquidTreasure(box));
@@ -3904,8 +5343,12 @@
     });
 
     window.addEventListener("resize", updateRunnerPosition);
+    loadRewards();
+    loadLeaderboard();
+    renderParentReport();
     renderMission();
     renderBuilder(true);
+    renderFlip();
   </script>
 </body>
 </html>
