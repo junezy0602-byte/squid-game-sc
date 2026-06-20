@@ -6,17 +6,26 @@ This is a static HTML game for Year 4 science experiment format practice.
 
 - `一二三木头人` - choose the correct science format before the doll catches you.
 - `连一连` - click word blocks in order to rebuild the science format sentence.
+- `翻牌挑战` - remember card positions and match science terms with the correct meaning.
+
+## Student Records
+
+The game keeps a local leaderboard in the browser and can also send student results to a Google Sheet database.
+
+- `保存成绩` saves the current class, student name, score, stars, pattern stickers, and report notes.
+- Before the cloud database is connected, results stay in the browser only.
+- To connect the Google Sheet backend, follow `backend/README.md`.
 
 ## Files
 
 - `index.html` - main game file
+- `backend/google-apps-script.js` - Google Apps Script backend for saving student results
+- `backend/README.md` - setup guide for the Google Sheet database
 - `assets/intro.mp4` - intro video
 - `assets/red-light.mp4` - red-light / doll phase video
 - `assets/bgm-squid-game.mp3` - 一二三木头人口令 / chant audio
 - `assets/correct.mp3` - correct answer sound
 - `assets/wrong.mp3` - wrong answer sound
-- `assets/doll.png` - doll character image
-- `assets/squid-game-gamer.png` - guard character image
 - `assets/doll-cutout.png` - transparent doll cutout used in the game stage
 - `assets/guard-cutout.png` - transparent guard cutout used in the game stage
 

@@ -1573,13 +1573,33 @@
 
     .student-input {
       min-height: 42px;
-      width: min(220px, 100%);
+      width: min(190px, 100%);
       border-radius: 8px;
       border: 1px solid var(--line);
       padding: 9px 11px;
       background: white;
       color: var(--ink);
       font-weight: 800;
+    }
+
+    .sync-status {
+      width: 100%;
+      text-align: right;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .sync-status.ok {
+      color: var(--green);
+    }
+
+    .sync-status.warn {
+      color: #a66700;
+    }
+
+    .sync-status.error {
+      color: var(--red);
     }
 
     .insight-body {
@@ -3689,10 +3709,12 @@
             <div class="insight-note">输入学生名字后，可以保存本机排行榜，也可以打印一页学习表现报告。</div>
           </div>
           <div class="student-tools">
+            <input class="student-input" id="className" type="text" maxlength="12" placeholder="班级，如 4SC" />
             <input class="student-input" id="studentName" type="text" maxlength="18" placeholder="学生名字" />
             <button class="btn secondary" id="saveRankBtn">保存成绩</button>
             <button class="btn secondary" id="clearRankBtn">清空排行榜</button>
             <button class="btn" id="printReportBtn">打印报告</button>
+            <div class="sync-status" id="syncStatus">云端数据库：尚未连接</div>
           </div>
         </div>
         <div class="insight-body">
@@ -3932,7 +3954,44 @@
       bestFlipMoves: 0
     };
 
+    const CLOUD_DATABASE_URL = "";
+    const CLOUD_DATABASE_ENABLED = CLOUD_DATABASE_URL.startsWith("https://");
+
     const el = (id) => document.getElementById(id);
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function setSyncStatus(message, type = "") {
+      const status = el("syncStatus");
+      if (!status) return;
+      status.textContent = message;
+      status.className = `sync-status ${type}`.trim();
+    }
+
+    function loadStudentProfile() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("science-format-student-profile") || "{}");
+        if (saved.className) el("className").value = String(saved.className).slice(0, 12);
+        if (saved.studentName) el("studentName").value = String(saved.studentName).slice(0, 18);
+      } catch {
+        localStorage.removeItem("science-format-student-profile");
+      }
+    }
+
+    function saveStudentProfile() {
+      localStorage.setItem("science-format-student-profile", JSON.stringify({
+        className: (el("className").value || "").trim().slice(0, 12),
+        studentName: (el("studentName").value || "").trim().slice(0, 18)
+      }));
+    }
 
     function ensureAudio() {
       if (!state.audioContext) {
@@ -4179,24 +4238,108 @@
       localStorage.setItem("science-format-leaderboard", JSON.stringify(state.leaderboard));
     }
 
-    function saveCurrentScore() {
+    function getCurrentLearningReport() {
+      const rewardCount = state.unlockedRewards.size;
+      const strengths = [];
+      if (state.maxMissionCombo >= 3) strengths.push("专注反应稳定，能连续答对红灯题。");
+      if (state.maxBuilderStreak >= 3) strengths.push("能把科学格式词块按正确顺序重组。");
+      if (state.bestFlipMatches >= 4) strengths.push("记忆位置和配对能力表现良好。");
+      if (state.unlockedRewards.has("speedRunner")) strengths.push("答题速度快，能在短时间内回忆格式。");
+      if (!strengths.length && state.score > 0) strengths.push("已开始熟悉科学格式关键词。");
+      if (!strengths.length) strengths.push("尚未完成挑战，建议先从第一关开始。");
+
+      const advice = [];
+      if (!state.unlockedRewards.has("firstStep")) advice.push("先练习「目的」和「操纵性定义」两个基础格式。");
+      if (state.maxMissionCombo < 3) advice.push("可让孩子重复第一关，训练专注和快速回忆。");
+      if (state.maxBuilderStreak < 3) advice.push("建议用格式表复习句子顺序，再挑战第二关。");
+      if (state.bestFlipMatches < 4) advice.push("可用翻牌挑战练习位置记忆和答案配对。");
+      if (!advice.length) advice.push("孩子已经掌握不少格式，可以尝试限时完成或向家长口头解释每个格式。");
+
+      const tags = [
+        `最高红灯连击 ${state.maxMissionCombo}`,
+        `句子连对 ${state.maxBuilderStreak}`,
+        `翻牌配对 ${state.bestFlipMatches}/8`,
+        `图案 ${rewardCount}`
+      ];
+
+      return {
+        strengths,
+        advice,
+        tags,
+        summary: strengths.join(" "),
+        nextStep: advice.join(" ")
+      };
+    }
+
+    function buildScoreEntry() {
       const input = el("studentName");
+      const classInput = el("className");
+      const className = (classInput.value || "Y4").trim().slice(0, 12) || "Y4";
       const name = (input.value || "学生").trim().slice(0, 18);
+      const report = getCurrentLearningReport();
+      classInput.value = className;
       input.value = name;
-      const entry = {
+      saveStudentProfile();
+      return {
+        className,
         name,
         score: state.score,
         stars: state.stars,
         rewards: state.unlockedRewards.size,
-        date: new Date().toLocaleDateString("zh-Hans")
+        rewardNames: [...state.unlockedRewards]
+          .map((id) => rewardCatalog.find((reward) => reward.id === id)?.name)
+          .filter(Boolean),
+        maxMissionCombo: state.maxMissionCombo,
+        maxBuilderStreak: state.maxBuilderStreak,
+        bestFlipMatches: state.bestFlipMatches,
+        bestFlipMoves: state.bestFlipMoves,
+        mode: state.mode,
+        reportSummary: report.summary,
+        reportAdvice: report.nextStep,
+        reportTags: report.tags,
+        date: new Date().toLocaleDateString("zh-Hans"),
+        timestamp: new Date().toISOString()
       };
+    }
+
+    async function uploadScoreToCloud(entry) {
+      if (!CLOUD_DATABASE_ENABLED) {
+        setSyncStatus("云端数据库：尚未连接，已先保存到本机", "warn");
+        return false;
+      }
+
+      setSyncStatus("云端数据库：正在上传...", "warn");
+      await fetch(CLOUD_DATABASE_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          source: "squid-game-sc",
+          version: "2026-06-20",
+          entry
+        })
+      });
+      setSyncStatus("云端数据库：已送出，请在后台表格确认", "ok");
+      return true;
+    }
+
+    async function saveCurrentScore() {
+      const entry = buildScoreEntry();
       state.leaderboard = [...state.leaderboard, entry]
         .sort((a, b) => b.score - a.score || b.stars - a.stars || b.rewards - a.rewards)
         .slice(0, 10);
       saveLeaderboard();
       renderLeaderboard();
       renderParentReport();
-      toast("成绩已保存到本机排行榜。");
+      try {
+        const uploaded = await uploadScoreToCloud(entry);
+        toast(uploaded ? "成绩已保存，并已送往云端后台。" : "成绩已保存到本机排行榜。");
+      } catch {
+        setSyncStatus("云端数据库：上传失败，本机已有备份", "error");
+        toast("成绩已保存到本机；云端暂时上传失败。");
+      }
     }
 
     function clearLeaderboard() {
@@ -4220,8 +4363,8 @@
         row.innerHTML = `
           <div class="rank-badge">${index + 1}</div>
           <div>
-            <div>${entry.name}</div>
-            <div class="leaderboard-meta">${entry.date} · 星星 ${entry.stars} · 图案 ${entry.rewards}</div>
+            <div>${escapeHTML(entry.name)}</div>
+            <div class="leaderboard-meta">${escapeHTML(entry.className || "Y4")} · ${escapeHTML(entry.date)} · 星星 ${entry.stars} · 图案 ${entry.rewards}</div>
           </div>
           <div>${entry.score}</div>
         `;
@@ -4233,37 +4376,17 @@
       const reportScore = el("reportScore");
       if (!reportScore) return;
       const name = (el("studentName").value || "学生").trim() || "学生";
+      const className = (el("className").value || "Y4").trim() || "Y4";
       const rewardCount = state.unlockedRewards.size;
       reportScore.textContent = state.score;
       el("reportStars").textContent = state.stars;
       el("reportRewards").textContent = `${rewardCount} / ${rewardCatalog.length}`;
-      el("printDate").textContent = `${name} · ${new Date().toLocaleDateString("zh-Hans")}`;
+      el("printDate").textContent = `${className} · ${name} · ${new Date().toLocaleDateString("zh-Hans")}`;
 
-      const strengths = [];
-      if (state.maxMissionCombo >= 3) strengths.push("专注反应稳定，能连续答对红灯题。");
-      if (state.maxBuilderStreak >= 3) strengths.push("能把科学格式词块按正确顺序重组。");
-      if (state.bestFlipMatches >= 4) strengths.push("记忆位置和配对能力表现良好。");
-      if (state.unlockedRewards.has("speedRunner")) strengths.push("答题速度快，能在短时间内回忆格式。");
-      if (!strengths.length && state.score > 0) strengths.push("已开始熟悉科学格式关键词。");
-      if (!strengths.length) strengths.push("尚未完成挑战，建议先从第一关开始。");
-
-      const advice = [];
-      if (!state.unlockedRewards.has("firstStep")) advice.push("先练习「目的」和「操纵性定义」两个基础格式。");
-      if (state.maxMissionCombo < 3) advice.push("可让孩子重复第一关，训练专注和快速回忆。");
-      if (state.maxBuilderStreak < 3) advice.push("建议用格式表复习句子顺序，再挑战第二关。");
-      if (state.bestFlipMatches < 4) advice.push("可用翻牌挑战练习位置记忆和答案配对。");
-      if (!advice.length) advice.push("孩子已经掌握不少格式，可以尝试限时完成或向家长口头解释每个格式。");
-
-      el("reportPerformance").textContent = strengths.join(" ");
-      el("reportAdvice").textContent = advice.join(" ");
-
-      const tags = [
-        `最高红灯连击 ${state.maxMissionCombo}`,
-        `句子连对 ${state.maxBuilderStreak}`,
-        `翻牌配对 ${state.bestFlipMatches}/8`,
-        `图案 ${rewardCount}`
-      ];
-      el("reportTags").innerHTML = tags.map((tag) => `<span class="report-tag">${tag}</span>`).join("");
+      const report = getCurrentLearningReport();
+      el("reportPerformance").textContent = report.summary;
+      el("reportAdvice").textContent = report.nextStep;
+      el("reportTags").innerHTML = report.tags.map((tag) => `<span class="report-tag">${escapeHTML(tag)}</span>`).join("");
     }
 
     function updateMissionEnergy() {
@@ -5331,7 +5454,14 @@
       renderParentReport();
       window.print();
     });
-    el("studentName").addEventListener("input", renderParentReport);
+    el("className").addEventListener("input", () => {
+      saveStudentProfile();
+      renderParentReport();
+    });
+    el("studentName").addEventListener("input", () => {
+      saveStudentProfile();
+      renderParentReport();
+    });
     el("levelOneTreasureBtn").addEventListener("click", chooseLevelOneTreasure);
     document.querySelectorAll("#squidTreasureZone .treasure-box").forEach((box) => {
       box.addEventListener("click", () => chooseSquidTreasure(box));
@@ -5343,6 +5473,8 @@
     });
 
     window.addEventListener("resize", updateRunnerPosition);
+    loadStudentProfile();
+    setSyncStatus(CLOUD_DATABASE_ENABLED ? "云端数据库：已连接" : "云端数据库：尚未连接", CLOUD_DATABASE_ENABLED ? "ok" : "warn");
     loadRewards();
     loadLeaderboard();
     renderParentReport();
