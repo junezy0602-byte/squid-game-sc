@@ -3762,6 +3762,10 @@
               <div class="report-tags" id="reportTags"></div>
             </div>
             <div class="report-section">
+              <b>需要复习 / Miss 的点</b>
+              <div id="reportMisses">完成挑战后，这里会列出孩子常错或超时的学习点。</div>
+            </div>
+            <div class="report-section">
               <b>给家长的建议</b>
               <div id="reportAdvice">建议先玩第一关，熟悉科学格式关键词。</div>
             </div>
@@ -3806,6 +3810,49 @@
       { id: "observation", title: "观察结果", answer: "1 看 2 比 3 最" },
       { id: "trend", title: "变化形式", answer: "上升、下降、保持不变、增加、减少" }
     ];
+
+    const skillProfiles = {
+      aim: {
+        title: "目的",
+        parentTip: "复习句型「为了研究操与反之间的关系」，让孩子先圈出操纵性变数和反应性变数。"
+      },
+      opDef: {
+        title: "操纵性定义",
+        parentTip: "练习「我们可以根据反来确定操」，重点是用观察到的结果来判断改变的事项。"
+      },
+      hypothesis: {
+        title: "假设 / 之间的关系",
+        parentTip: "多口头练习「操越……反越……」，帮助孩子把两个变数连成完整关系。"
+      },
+      variables: {
+        title: "变数",
+        parentTip: "用三色笔区分操纵性变数、反应性变数和固定性变数，尤其记住「不同、观察、一样」。"
+      },
+      conclusion: {
+        title: "结论",
+        parentTip: "复习结论要回到科学原理，并用「操越……反越……」说出实验发现。"
+      },
+      inference: {
+        title: "推断",
+        parentTip: "练习用「为什么？」解释观察到的现象，避免只写结果不写原因。"
+      },
+      observation: {
+        title: "观察结果",
+        parentTip: "复习口诀「1 看 2 比 3 最」，让孩子先看数据，再比较，最后写最明显的结果。"
+      },
+      trend: {
+        title: "变化形式",
+        parentTip: "用图表练习上升、下降、保持不变、增加和减少，帮助孩子描述数据趋势。"
+      },
+      sequence: {
+        title: "科学格式顺序",
+        parentTip: "让孩子按顺序说出：目的、操纵性定义、假设、变数、结论、推断、观察结果、变化形式。"
+      },
+      memory: {
+        title: "记忆配对",
+        parentTip: "翻牌时先记位置，再说出题目与格式的关系，训练短期记忆和专注。"
+      }
+    };
 
     const builderChallenges = [
       {
@@ -3860,51 +3907,61 @@
 
     const quizQuestions = [
       {
+        skillId: "aim",
         q: "目的的格式是什么？",
         options: ["为了研究操与反之间的关系", "我们可以根据反来确定操", "为什么？"],
         answer: "为了研究操与反之间的关系"
       },
       {
+        skillId: "opDef",
         q: "操纵性定义怎样写？",
         options: ["我们可以根据反来确定操", "操越……反越……", "1 看 2 比 3 最"],
         answer: "我们可以根据反来确定操"
       },
       {
+        skillId: "hypothesis",
         q: "假设常用哪个句型？",
         options: ["操越……反越……", "操纵性变数：观察", "固定性变数：不同"],
         answer: "操越……反越……"
       },
       {
+        skillId: "variables",
         q: "操纵性变数要写什么？",
         options: ["不同", "观察", "一样"],
         answer: "不同"
       },
       {
+        skillId: "variables",
         q: "反应性变数要写什么？",
         options: ["观察", "不同", "保持不变"],
         answer: "观察"
       },
       {
+        skillId: "variables",
         q: "固定性变数要写什么？",
         options: ["一样", "增加", "为什么？"],
         answer: "一样"
       },
       {
+        skillId: "conclusion",
         q: "结论可以用什么格式？",
         options: ["科学原理 / 操越……反越……", "1 看 2 比 3 最", "我们可以根据反来确定操"],
         answer: "科学原理 / 操越……反越……"
       },
       {
+        skillId: "inference",
         q: "推断是在回答什么？",
         options: ["为什么？", "不同", "上升、下降"],
         answer: "为什么？"
       },
       {
+        skillId: "observation",
         q: "观察结果口诀是什么？",
         options: ["1 看 2 比 3 最", "操越……反越……", "反应性变数：一样"],
         answer: "1 看 2 比 3 最"
       },
       {
+        skillId: "trend",
         q: "哪一组都是变化形式？",
         options: ["上升、下降、保持不变、增加、减少", "目的、推断、观察", "不同、观察、一样"],
         answer: "上升、下降、保持不变、增加、减少"
@@ -3977,7 +4034,9 @@
       maxMissionCombo: 0,
       maxBuilderStreak: 0,
       bestFlipMatches: 0,
-      bestFlipMoves: 0
+      bestFlipMoves: 0,
+      skillStats: {},
+      attemptLog: []
     };
 
     const CLOUD_DATABASE_URL = "https://script.google.com/macros/s/AKfycbwxjcYuLfB0NXYZedrlbPseRZUpm3qXLADXEm_Oj4lZaU6xEGi_RSYVTlsCE9hiyH_3yQ/exec";
@@ -4206,6 +4265,71 @@
       return shuffle([item.answer, ...wrong]);
     }
 
+    function getSkillTitle(skillId) {
+      return skillProfiles[skillId]?.title || formatItems.find((item) => item.id === skillId)?.title || "综合练习";
+    }
+
+    function ensureSkillStat(skillId) {
+      const id = skillId || "memory";
+      if (!state.skillStats[id]) {
+        state.skillStats[id] = {
+          skillId: id,
+          title: getSkillTitle(id),
+          correct: 0,
+          wrong: 0,
+          timeout: 0
+        };
+      }
+      return state.skillStats[id];
+    }
+
+    function recordLearningEvent({ skillId, mode, prompt, selected, correctAnswer, correct, reason = "" }) {
+      const id = skillId || "memory";
+      const stat = ensureSkillStat(id);
+      if (correct) {
+        stat.correct += 1;
+      } else if (reason === "timeout") {
+        stat.timeout += 1;
+      } else {
+        stat.wrong += 1;
+      }
+
+      state.attemptLog.push({
+        time: new Date().toISOString(),
+        skillId: id,
+        skill: getSkillTitle(id),
+        mode: mode || state.mode,
+        prompt: String(prompt || getSkillTitle(id)).slice(0, 120),
+        selected: String(selected || (reason === "timeout" ? "未作答" : "")).slice(0, 160),
+        correctAnswer: String(correctAnswer || "").slice(0, 160),
+        correct: Boolean(correct),
+        reason
+      });
+      if (state.attemptLog.length > 80) state.attemptLog.shift();
+      renderParentReport();
+    }
+
+    function getMissedSkills() {
+      return Object.values(state.skillStats)
+        .map((stat) => ({
+          ...stat,
+          misses: stat.wrong + stat.timeout
+        }))
+        .filter((stat) => stat.misses > 0)
+        .sort((a, b) => b.misses - a.misses || b.timeout - a.timeout || a.title.localeCompare(b.title, "zh-Hans"));
+    }
+
+    function getMistakeDetails(limit = 5) {
+      return state.attemptLog
+        .filter((item) => !item.correct)
+        .slice(-limit)
+        .reverse()
+        .map((item) => {
+          const selectedText = item.reason === "timeout" ? "未及时作答" : `选了「${item.selected || "空白"}」`;
+          return `${item.skill}：${selectedText}，正确是「${item.correctAnswer || "见课堂格式"}」。`;
+        });
+    }
+
     function addScore(points) {
       state.score += points;
       const score = el("score");
@@ -4298,6 +4422,8 @@
 
     function getCurrentLearningReport() {
       const rewardCount = state.unlockedRewards.size;
+      const missedSkills = getMissedSkills();
+      const mistakeDetails = getMistakeDetails();
       const strengths = [];
       if (state.maxMissionCombo >= 3) strengths.push("专注反应稳定，能连续答对红灯题。");
       if (state.maxBuilderStreak >= 3) strengths.push("能把科学格式词块按正确顺序重组。");
@@ -4307,25 +4433,47 @@
       if (!strengths.length) strengths.push("尚未完成挑战，建议先从第一关开始。");
 
       const advice = [];
+      missedSkills.slice(0, 3).forEach((skill) => {
+        const tip = skillProfiles[skill.skillId]?.parentTip;
+        if (tip && !advice.includes(tip)) advice.push(tip);
+      });
       if (!state.unlockedRewards.has("firstStep")) advice.push("先练习「目的」和「操纵性定义」两个基础格式。");
       if (state.maxMissionCombo < 3) advice.push("可让孩子重复第一关，训练专注和快速回忆。");
       if (state.maxBuilderStreak < 3) advice.push("建议用格式表复习句子顺序，再挑战第二关。");
       if (state.bestFlipMatches < 4) advice.push("可用翻牌挑战练习位置记忆和答案配对。");
       if (!advice.length) advice.push("孩子已经掌握不少格式，可以尝试限时完成或向家长口头解释每个格式。");
 
+      const missedSummary = missedSkills.length
+        ? `需要复习：${missedSkills.slice(0, 4).map((skill) => `${skill.title}（${skill.misses} 次）`).join("、")}。`
+        : state.score > 0
+          ? "暂时没有明显错题记录，可继续提高速度和稳定度。"
+          : "尚未有错题记录，完成挑战后会自动整理。";
+
       const tags = [
         `最高红灯连击 ${state.maxMissionCombo}`,
         `句子连对 ${state.maxBuilderStreak}`,
         `翻牌配对 ${state.bestFlipMatches}/8`,
-        `图案 ${rewardCount}`
+        `图案 ${rewardCount}`,
+        missedSkills.length ? `需复习 ${missedSkills[0].title}` : "错题 0"
       ];
 
       return {
         strengths,
         advice,
+        missedSkills,
+        mistakeDetails,
+        missedSummary,
         tags,
         summary: strengths.join(" "),
-        nextStep: advice.join(" ")
+        nextStep: advice.join(" "),
+        emailBody: [
+          "Y4 科学格式学习报告",
+          "",
+          `学习表现：${strengths.join(" ")}`,
+          missedSummary,
+          mistakeDetails.length ? `最近 miss 的点：${mistakeDetails.join(" ")}` : "最近 miss 的点：暂时没有明显错题记录。",
+          `给家长的建议：${advice.join(" ")}`
+        ].join("\n")
       };
     }
 
@@ -4353,8 +4501,18 @@
         bestFlipMoves: state.bestFlipMoves,
         mode: state.mode,
         reportSummary: report.summary,
+        reportMisses: report.missedSummary,
+        mistakeDetails: report.mistakeDetails,
         reportAdvice: report.nextStep,
         reportTags: report.tags,
+        emailReport: report.emailBody,
+        skillStats: report.missedSkills.map((skill) => ({
+          skill: skill.title,
+          correct: skill.correct,
+          wrong: skill.wrong,
+          timeout: skill.timeout,
+          misses: skill.misses
+        })),
         date: new Date().toLocaleDateString("zh-Hans"),
         timestamp: new Date().toISOString()
       };
@@ -4375,7 +4533,7 @@
         },
         body: JSON.stringify({
           source: "squid-game-sc",
-          version: "2026-06-20",
+          version: "2026-06-24",
           entry
         })
       });
@@ -4445,6 +4603,10 @@
 
       const report = getCurrentLearningReport();
       el("reportPerformance").textContent = report.summary;
+      el("reportMisses").textContent = [
+        report.missedSummary,
+        ...report.mistakeDetails
+      ].join(" ");
       el("reportAdvice").textContent = report.nextStep;
       el("reportTags").innerHTML = report.tags.map((tag) => `<span class="report-tag">${escapeHTML(tag)}</span>`).join("");
     }
@@ -4673,6 +4835,16 @@
         el("missionTime").textContent = state.missionTime;
         if (state.missionTime <= 0) {
           clearInterval(state.missionTimer);
+          const current = formatItems[state.missionIndex];
+          recordLearningEvent({
+            skillId: current.id,
+            mode: "一二三木头人",
+            prompt: current.title,
+            selected: "未作答",
+            correctAnswer: current.answer,
+            correct: false,
+            reason: "timeout"
+          });
           loseMissionStar("太慢了！娃娃看到你还没回答，掉 1 颗星。");
         }
       }, 1000);
@@ -4727,6 +4899,14 @@
       });
 
       if (correct) {
+        recordLearningEvent({
+          skillId: current.id,
+          mode: "一二三木头人",
+          prompt: current.title,
+          selected: choice,
+          correctAnswer: current.answer,
+          correct: true
+        });
         button.classList.add("correct");
         state.missionCombo += 1;
         state.maxMissionCombo = Math.max(state.maxMissionCombo, state.missionCombo);
@@ -4763,6 +4943,14 @@
           beginChantPhase();
         }, 900);
       } else {
+        recordLearningEvent({
+          skillId: current.id,
+          mode: "一二三木头人",
+          prompt: current.title,
+          selected: choice,
+          correctAnswer: current.answer,
+          correct: false
+        });
         button.classList.add("wrong");
         state.missionCombo = 0;
         updateMissionEnergy();
@@ -4994,12 +5182,28 @@
       const answer = state.builderSelected.map((token) => token.label);
       const correct = answer.every((label, index) => label === challenge.answerTokens[index]);
       if (!correct) {
+        recordLearningEvent({
+          skillId: challenge.id,
+          mode: "句子重组",
+          prompt: challenge.title,
+          selected: answer.join(" "),
+          correctAnswer: challenge.answerTokens.join(" "),
+          correct: false
+        });
         state.builderStreak = 0;
         setBuilderFeedback("顺序还不对。可以点上面的词块撤回，或按清空再试。", "bad");
         playSoundEffect("wrong");
         return;
       }
 
+      recordLearningEvent({
+        skillId: challenge.id,
+        mode: "句子重组",
+        prompt: challenge.title,
+        selected: answer.join(" "),
+        correctAnswer: challenge.answerTokens.join(" "),
+        correct: true
+      });
       state.builderSolved = true;
       state.builderStreak += 1;
       state.maxBuilderStreak = Math.max(state.maxBuilderStreak, state.builderStreak);
@@ -5165,6 +5369,14 @@
       const matched = first && second && first.pairId === second.pairId && first.type !== second.type;
 
       if (matched) {
+        recordLearningEvent({
+          skillId: first.pairId,
+          mode: "翻牌记忆",
+          prompt: getSkillTitle(first.pairId),
+          selected: `${first.label} + ${second.label}`,
+          correctAnswer: formatItems.find((item) => item.id === first.pairId)?.answer || "",
+          correct: true
+        });
         state.flipMatched.add(first.pairId);
         state.flipStreak += 1;
         state.bestFlipMatches = Math.max(state.bestFlipMatches, state.flipMatched.size);
@@ -5191,6 +5403,16 @@
       }
 
       state.flipStreak = 0;
+      if (first && second) {
+        recordLearningEvent({
+          skillId: first.pairId || "memory",
+          mode: "翻牌记忆",
+          prompt: `${first.label} / ${second.label}`,
+          selected: `${first.label} + ${second.label}`,
+          correctAnswer: `要配同一个学习点：${getSkillTitle(first.pairId)}。`,
+          correct: false
+        });
+      }
       setFlipFeedback("这两张不是一对，记住它们的位置，再试一次。", "bad");
       playSoundEffect("wrong");
       document.querySelectorAll(".flip-card.flipped").forEach((button) => button.classList.add("miss"));
@@ -5261,6 +5483,14 @@
 
       if (state.selectedTerm === state.selectedAnswer) {
         state.matched.add(id);
+        recordLearningEvent({
+          skillId: id,
+          mode: "配对练习",
+          prompt: getSkillTitle(id),
+          selected: formatItems.find((item) => item.id === id)?.answer || "",
+          correctAnswer: formatItems.find((item) => item.id === id)?.answer || "",
+          correct: true
+        });
         document.querySelectorAll(`[data-id="${id}"]`).forEach((card) => {
           card.classList.remove("selected");
           card.classList.add("correct");
@@ -5276,6 +5506,16 @@
           setFeedback("matchFeedback", "全部配对成功！可以去挑战排序。", "good");
         }
       } else {
+        const selectedItem = formatItems.find((item) => item.id === state.selectedAnswer);
+        const correctItem = formatItems.find((item) => item.id === state.selectedTerm);
+        recordLearningEvent({
+          skillId: state.selectedTerm,
+          mode: "配对练习",
+          prompt: getSkillTitle(state.selectedTerm),
+          selected: selectedItem ? selectedItem.answer : "未选择答案",
+          correctAnswer: correctItem ? correctItem.answer : "",
+          correct: false
+        });
         document.querySelectorAll(".card.selected").forEach((card) => card.classList.add("wrong"));
         setFeedback("matchFeedback", "再想想：题目和答案格式还没配上。", "bad");
         setTimeout(() => {
@@ -5328,6 +5568,14 @@
         toast("顺序正确！得到 1 颗星。");
         setFeedback("sortFeedback", "顺序正确：目的 → 操纵性定义 → 假设 → 变数 → 结论 → 推断 → 观察结果 → 变化形式", "good");
       } else if (showWrong) {
+        recordLearningEvent({
+          skillId: "sequence",
+          mode: "排序练习",
+          prompt: "科学格式顺序",
+          selected: state.sortItems.map((item) => item.title).join(" → "),
+          correctAnswer: formatItems.map((item) => item.title).join(" → "),
+          correct: false
+        });
         setFeedback("sortFeedback", "还没完全正确。提示：先目的，再操纵性定义，再假设。", "bad");
       } else {
         setFeedback("sortFeedback", "继续调整，排对会自动提示。");
@@ -5375,11 +5623,27 @@
       });
 
       if (correct) {
+        recordLearningEvent({
+          skillId: question.skillId,
+          mode: "快问快答",
+          prompt: question.q,
+          selected: option,
+          correctAnswer: question.answer,
+          correct: true
+        });
         button.classList.add("correct");
         state.quizCorrect += 1;
         addScore(10);
         setFeedback("quizFeedback", "答对！继续保持。", "good");
       } else {
+        recordLearningEvent({
+          skillId: question.skillId,
+          mode: "快问快答",
+          prompt: question.q,
+          selected: option,
+          correctAnswer: question.answer,
+          correct: false
+        });
         button.classList.add("wrong");
         setFeedback("quizFeedback", `正确答案：${question.answer}`, "bad");
       }
