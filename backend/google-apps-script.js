@@ -21,8 +21,9 @@ const HEADERS = [
   "Parent Advice",
   "Report Tags",
   "Skill Diagnostics",
-  "Email Report",
-  "Email Sent At",
+  "WhatsApp Report",
+  "WhatsApp Link",
+  "WhatsApp Link Created At",
   "Source",
   "Version"
 ];
@@ -30,7 +31,7 @@ const HEADERS = [
 const CONTACT_HEADERS = [
   "Class",
   "Student Name",
-  "Parent Email",
+  "Parent WhatsApp",
   "Parent Name",
   "Notes"
 ];
@@ -39,7 +40,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Y4 Reports")
     .addItem("Create parent contacts sheet", "createParentContactsSheet")
-    .addItem("Send report for selected rows", "sendReportsForSelectedRows")
+    .addItem("Build WhatsApp links for selected rows", "buildWhatsAppLinksForSelectedRows")
     .addToUi();
 }
 
@@ -80,7 +81,8 @@ function doPost(e) {
       cleanText(entry.reportAdvice || "", 800),
       cleanList(entry.reportTags, 500),
       cleanSkillDiagnostics(entry.skillStats),
-      cleanText(entry.emailReport || "", 3000),
+      cleanText(entry.whatsAppReport || "", 3000),
+      "",
       "",
       cleanText(body.source || "squid-game-sc", 60),
       cleanText(body.version || "", 40)
@@ -147,14 +149,14 @@ function createParentContactsSheet() {
     .setFontWeight("bold")
     .setBackground("#fff4d8");
   sheet.autoResizeColumns(1, CONTACT_HEADERS.length);
-  SpreadsheetApp.getUi().alert("Parent Contacts sheet is ready. Add Class, Student Name, and Parent Email before sending reports.");
+  SpreadsheetApp.getUi().alert("Parent Contacts sheet is ready. Add Class, Student Name, and Parent WhatsApp number. Use country code, for example 60123456789.");
 }
 
-function sendReportsForSelectedRows() {
+function buildWhatsAppLinksForSelectedRows() {
   const ui = SpreadsheetApp.getUi();
   const sheet = SpreadsheetApp.getActiveSheet();
   if (!sheet || sheet.getName() !== SHEET_NAME) {
-    ui.alert(`Open the "${SHEET_NAME}" sheet first, then select the student row or rows to send.`);
+    ui.alert(`Open the "${SHEET_NAME}" sheet first, then select the student row or rows.`);
     return;
   }
 
@@ -174,17 +176,18 @@ function sendReportsForSelectedRows() {
     return;
   }
 
-  const result = sendReportsForRows_(rows);
-  ui.alert(`Reports sent: ${result.sent}\nSkipped: ${result.skipped.join("\n") || "None"}`);
+  const result = buildWhatsAppLinksForRows_(rows);
+  ui.alert(`WhatsApp links ready: ${result.ready}\nSkipped: ${result.skipped.join("\n") || "None"}`);
 }
 
-function sendReportsForRows_(rows) {
+function buildWhatsAppLinksForRows_(rows) {
   const sheet = getResultSheet();
   ensureHeaders(sheet);
   const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
   const contacts = loadParentContacts_();
-  const sentAtColumn = headers.indexOf("Email Sent At") + 1;
-  const result = { sent: 0, skipped: [] };
+  const linkColumn = headers.indexOf("WhatsApp Link") + 1;
+  const createdAtColumn = headers.indexOf("WhatsApp Link Created At") + 1;
+  const result = { ready: 0, skipped: [] };
 
   rows.forEach((row) => {
     const values = sheet.getRange(row, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -192,18 +195,18 @@ function sendReportsForRows_(rows) {
     const className = cleanText(entry["Class"], 24);
     const studentName = cleanText(entry["Student Name"], 40);
     const contact = contacts[contactKey_(className, studentName)];
-    if (!contact || !contact.email) {
-      result.skipped.push(`${className} ${studentName}: no parent email`);
+    if (!contact || !contact.phone) {
+      result.skipped.push(`${className} ${studentName}: no parent WhatsApp number`);
       return;
     }
 
-    MailApp.sendEmail({
-      to: contact.email,
-      subject: buildParentEmailSubject_(entry),
-      body: buildParentEmailBody_(entry, contact)
-    });
-    if (sentAtColumn > 0) sheet.getRange(row, sentAtColumn).setValue(new Date());
-    result.sent += 1;
+    const link = buildWhatsAppUrl_(contact.phone, buildWhatsAppMessage_(entry, contact));
+    if (linkColumn > 0) {
+      sheet.getRange(row, linkColumn)
+        .setFormula(`=HYPERLINK("${link}", "Open WhatsApp")`);
+    }
+    if (createdAtColumn > 0) sheet.getRange(row, createdAtColumn).setValue(new Date());
+    result.ready += 1;
   });
 
   return result;
@@ -223,10 +226,10 @@ function loadParentContacts_() {
   values.slice(1).forEach((row) => {
     const className = cleanText(row[0], 24);
     const studentName = cleanText(row[1], 40);
-    const email = cleanText(row[2], 120);
+    const phone = cleanPhone(row[2]);
     const parentName = cleanText(row[3], 80);
-    if (className && studentName && email) {
-      contacts[contactKey_(className, studentName)] = { email, parentName };
+    if (className && studentName && phone) {
+      contacts[contactKey_(className, studentName)] = { phone, parentName };
     }
   });
   return contacts;
@@ -243,37 +246,38 @@ function rowToObject_(headers, values) {
   }, {});
 }
 
-function buildParentEmailSubject_(entry) {
-  return `Y4 Science Game Learning Report - ${cleanText(entry["Student Name"], 40)}`;
+function buildWhatsAppUrl_(phone, message) {
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-function buildParentEmailBody_(entry, contact) {
-  const parentGreeting = contact.parentName ? `Dear ${contact.parentName},` : "Dear Parent / Guardian,";
-  const savedReport = cleanText(entry["Email Report"], 3000);
+function buildWhatsAppMessage_(entry, contact) {
+  const greeting = contact.parentName ? `Hi ${contact.parentName},` : "Hi Parent / Guardian,";
+  const savedReport = cleanText(entry["WhatsApp Report"], 3000);
   if (savedReport) {
     return [
-      parentGreeting,
+      greeting,
       "",
       savedReport,
       "",
-      "This report is generated from the Y4 Science Game practice activity.",
-      "Thank you."
+      "这份报告根据孩子在 Y4 科学格式小游戏中的练习自动整理。"
     ].join("\n");
   }
 
   return [
-    parentGreeting,
+    greeting,
     "",
-    `Student: ${cleanText(entry["Student Name"], 40)} (${cleanText(entry["Class"], 24)})`,
-    `Score: ${toNumber(entry["Score"])} | Stars: ${toNumber(entry["Stars"])} | Patterns: ${toNumber(entry["Pattern Count"])}`,
+    "*Y4 科学格式学习报告*",
     "",
-    `Learning performance: ${cleanText(entry["Learning Performance"], 800)}`,
-    `Missed points: ${cleanText(entry["Missed Points"], 800)}`,
-    `Recent mistakes: ${cleanText(entry["Mistake Details"], 1200)}`,
-    `Parent advice: ${cleanText(entry["Parent Advice"], 800)}`,
+    `学生：${cleanText(entry["Student Name"], 40)}`,
+    `班级：${cleanText(entry["Class"], 24)}`,
+    `分数：${toNumber(entry["Score"])}｜星星：${toNumber(entry["Stars"])}｜图案：${toNumber(entry["Pattern Count"])}`,
     "",
-    "This report is generated from the Y4 Science Game practice activity.",
-    "Thank you."
+    `*学习表现*：${cleanText(entry["Learning Performance"], 800)}`,
+    `*需要复习*：${cleanText(entry["Missed Points"], 800)}`,
+    `*最近 miss 的点*：${cleanText(entry["Mistake Details"], 1200)}`,
+    `*给家长的建议*：${cleanText(entry["Parent Advice"], 800)}`,
+    "",
+    "这份报告根据孩子在 Y4 科学格式小游戏中的练习自动整理。"
   ].join("\n");
 }
 
@@ -294,6 +298,12 @@ function cleanSkillDiagnostics(value) {
     .filter(Boolean)
     .join("; ")
     .slice(0, 1200);
+}
+
+function cleanPhone(value) {
+  let phone = String(value || "").replace(/\D/g, "");
+  if (phone.startsWith("0")) phone = `6${phone}`;
+  return phone.slice(0, 20);
 }
 
 function toNumber(value) {

@@ -15,7 +15,7 @@ The game keeps a local leaderboard in the browser and can also send student resu
 - `保存成绩` saves the current class, student name, score, stars, pattern stickers, missed learning points, recent mistakes, and report notes.
 - Before the cloud database is connected, results stay in the browser only.
 - To connect the Google Sheet backend, follow `backend/README.md`.
-- The backend script can prepare parent report emails from selected result rows after teacher review.
+- The backend script can prepare WhatsApp parent report links from selected result rows after teacher review.
 
 ## Student And Teacher Links
 

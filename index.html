@@ -3739,6 +3739,7 @@
             <button class="btn secondary" id="saveRankBtn">保存成绩</button>
             <button class="btn secondary teacher-only" id="clearRankBtn" hidden>清空排行榜</button>
             <button class="btn teacher-only" id="printReportBtn" hidden>打印报告</button>
+            <button class="btn teacher-only" id="copyWhatsAppBtn" hidden>复制 WhatsApp 报告</button>
             <div class="student-save-status" id="studentSaveStatus">完成一轮后，点这里保存成绩。</div>
             <div class="sync-status teacher-only" id="syncStatus" hidden>云端数据库：尚未连接</div>
           </div>
@@ -4466,15 +4467,38 @@
         tags,
         summary: strengths.join(" "),
         nextStep: advice.join(" "),
-        emailBody: [
-          "Y4 科学格式学习报告",
+        whatsAppBody: [
+          "*Y4 科学格式学习报告*",
           "",
-          `学习表现：${strengths.join(" ")}`,
-          missedSummary,
-          mistakeDetails.length ? `最近 miss 的点：${mistakeDetails.join(" ")}` : "最近 miss 的点：暂时没有明显错题记录。",
-          `给家长的建议：${advice.join(" ")}`
+          `*学习表现*：${strengths.join(" ")}`,
+          `*${missedSummary}*`,
+          mistakeDetails.length ? `*最近 miss 的点*：${mistakeDetails.join(" ")}` : "*最近 miss 的点*：暂时没有明显错题记录。",
+          `*给家长的建议*：${advice.join(" ")}`
         ].join("\n")
       };
+    }
+
+    function buildWhatsAppReportText(entry = null) {
+      const report = getCurrentLearningReport();
+      const className = entry?.className || (el("className").value || "Y4").trim() || "Y4";
+      const name = entry?.name || (el("studentName").value || "学生").trim() || "学生";
+      const score = entry?.score ?? state.score;
+      const stars = entry?.stars ?? state.stars;
+      const rewards = entry?.rewards ?? state.unlockedRewards.size;
+      return [
+        "*Y4 科学格式学习报告*",
+        "",
+        `学生：${name}`,
+        `班级：${className}`,
+        `分数：${score}｜星星：${stars}｜图案：${rewards}/${rewardCatalog.length}`,
+        "",
+        `*学习表现*：${report.summary}`,
+        `*${report.missedSummary}*`,
+        report.mistakeDetails.length ? `*最近 miss 的点*：${report.mistakeDetails.join(" ")}` : "*最近 miss 的点*：暂时没有明显错题记录。",
+        `*给家长的建议*：${report.nextStep}`,
+        "",
+        "这份报告根据孩子在 Y4 科学格式小游戏中的练习自动整理。"
+      ].join("\n");
     }
 
     function buildScoreEntry() {
@@ -4505,7 +4529,7 @@
         mistakeDetails: report.mistakeDetails,
         reportAdvice: report.nextStep,
         reportTags: report.tags,
-        emailReport: report.emailBody,
+        whatsAppReport: buildWhatsAppReportText(),
         skillStats: report.missedSkills.map((skill) => ({
           skill: skill.title,
           correct: skill.correct,
@@ -4609,6 +4633,26 @@
       ].join(" ");
       el("reportAdvice").textContent = report.nextStep;
       el("reportTags").innerHTML = report.tags.map((tag) => `<span class="report-tag">${escapeHTML(tag)}</span>`).join("");
+    }
+
+    async function copyWhatsAppReport() {
+      renderParentReport();
+      const text = buildWhatsAppReportText();
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("WhatsApp 报告已复制，可以贴给家长。");
+      } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+        toast("WhatsApp 报告已复制，可以贴给家长。");
+      }
     }
 
     function updateMissionEnergy() {
@@ -5778,6 +5822,7 @@
       renderParentReport();
       window.print();
     });
+    el("copyWhatsAppBtn").addEventListener("click", copyWhatsAppReport);
     el("className").addEventListener("input", () => {
       saveStudentProfile();
       renderParentReport();
