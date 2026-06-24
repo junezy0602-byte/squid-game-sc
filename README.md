@@ -19,12 +19,13 @@ The game keeps a local leaderboard in the browser and can also send student resu
 
 ## Student And Teacher Links
 
-- Student mode is the default. Students only see the game and the simple save form.
-- Teacher mode is enabled by adding `?teacher=1` to the URL. It shows the local leaderboard, parent report, print button, and cloud sync status.
+- `index.html` is the student game. Students only see the game and the simple save form.
+- `teacher.html` is the teacher report builder. Teachers can paste one Google Sheet row or type a student's data, then download a parent report as PNG or PDF for WhatsApp.
 
 ## Files
 
 - `index.html` - main game file
+- `teacher.html` - teacher-only report builder for parent PNG/PDF reports
 - `backend/google-apps-script.js` - Google Apps Script backend for saving student results
 - `backend/README.md` - setup guide for the Google Sheet database
 - `assets/intro.mp4` - intro video

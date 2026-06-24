@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Y4 Science Teacher Report Builder</title>
+  <style>
+    :root {
+      --ink: #17262d;
+      --muted: #657b86;
+      --line: #d7e3e7;
+      --panel: #ffffff;
+      --bg: #f5faf8;
+      --pink: #ff477e;
+      --green: #19a974;
+      --teal: #16b8a6;
+      --yellow: #f7c948;
+      --blue: #3f7cff;
+      --shadow: 0 18px 48px rgba(31, 47, 54, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(23, 38, 45, 0.04) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(23, 38, 45, 0.04) 1px, transparent 1px),
+        var(--bg);
+      background-size: 28px 28px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px clamp(16px, 4vw, 40px);
+      background: rgba(255, 255, 255, 0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .badge {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--pink);
+      color: white;
+      font-weight: 950;
+      box-shadow: 0 10px 24px rgba(255, 71, 126, 0.24);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .student-link {
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 900;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: white;
+      white-space: nowrap;
+    }
+
+    main {
+      width: min(1480px, calc(100% - 32px));
+      margin: 22px auto 48px;
+      display: grid;
+      grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, rgba(25, 169, 116, 0.1), rgba(247, 201, 72, 0.14));
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 950;
+    }
+
+    .panel-note {
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .panel-body {
+      padding: 16px 18px 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-weight: 900;
+      color: #2a3a42;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 11px;
+      background: #fbfefd;
+      color: var(--ink);
+      font-weight: 750;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: rgba(63, 124, 255, 0.78);
+      box-shadow: 0 0 0 3px rgba(63, 124, 255, 0.14);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 13px;
+      min-height: 42px;
+      background: var(--pink);
+      color: white;
+      font-weight: 950;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(255, 71, 126, 0.18);
+    }
+
+    .btn.secondary {
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .btn.green {
+      background: var(--green);
+      box-shadow: 0 10px 22px rgba(25, 169, 116, 0.18);
+    }
+
+    .status {
+      min-height: 20px;
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .canvas-wrap {
+      padding: 14px;
+      background: #edf7f4;
+      border-top: 1px solid var(--line);
+      overflow: auto;
+    }
+
+    canvas {
+      display: block;
+      width: min(100%, 720px);
+      height: auto;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: 0 18px 44px rgba(31, 47, 54, 0.18);
+      background: white;
+    }
+
+    .print-sheet {
+      display: none;
+    }
+
+    .hint-box {
+      border: 1px solid #ffe08a;
+      background: #fff9e8;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #4d3a16;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .topbar,
+      main {
+        display: none !important;
+      }
+
+      .print-sheet {
+        display: block;
+        padding: 0;
+      }
+
+      .print-card {
+        width: 100%;
+        min-height: 100vh;
+        padding: 28px;
+        color: var(--ink);
+        font-family: Inter, Arial, sans-serif;
+      }
+
+      .print-card h2 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      .print-card h3 {
+        margin: 18px 0 6px;
+        font-size: 17px;
+      }
+
+      .print-card p {
+        margin: 0;
+        line-height: 1.55;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="badge">Y4</div>
+        <div>
+          <h1>Teacher Report Builder</h1>
+          <div class="subtitle">生成可发给家长的 Y4 科学格式学习报告图片或 PDF。</div>
+        </div>
+      </div>
+      <a class="student-link" href="index.html">打开学生游戏</a>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">学生资料</h2>
+          <div class="panel-note">可以从 Google Sheet 复制一整行粘贴进来，也可以手动填写。</div>
+        </div>
+        <div class="panel-body">
+          <label>
+            从 Student Results 粘贴一行
+            <textarea id="sheetPaste" placeholder="可以复制含标题的一行，或只复制学生数据那一行。"></textarea>
+          </label>
+          <div class="actions">
+            <button class="btn secondary" id="loadPasteBtn">载入粘贴资料</button>
+            <button class="btn secondary" id="sampleBtn">示范资料</button>
+            <button class="btn secondary" id="clearBtn">清空</button>
+          </div>
+
+          <div class="field-grid">
+            <label>班级 <input id="className" value="4SC"></label>
+            <label>学生名字 <input id="studentName" value="学生"></label>
+            <label>分数 <input id="score" type="number" value="0"></label>
+            <label>星星 <input id="stars" type="number" value="0"></label>
+            <label>图案数量 <input id="patterns" type="number" value="0"></label>
+            <label>日期 <input id="date" value=""></label>
+          </div>
+
+          <label>学习表现
+            <textarea id="performance">尚未完成挑战，建议先从第一关开始。</textarea>
+          </label>
+          <label>需要复习 / Miss 的点
+            <textarea id="misses">尚未有错题记录，完成挑战后会自动整理。</textarea>
+          </label>
+          <label>最近答错细节
+            <textarea id="mistakes">暂时没有明显错题记录。</textarea>
+          </label>
+          <label>给家长的建议
+            <textarea id="advice">建议先玩第一关，熟悉科学格式关键词。</textarea>
+          </label>
+          <label>家长 WhatsApp 号码（选填）
+            <input id="phone" placeholder="例如 60123456789">
+          </label>
+
+          <div class="hint-box">建议流程：先在 Google Sheet 检查学生资料，再在这里生成图片或 PDF，最后用 WhatsApp 手动发送给家长。</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">报告输出</h2>
+          <div class="panel-note">PNG 可以直接发 WhatsApp；PDF 可用作正式报告。</div>
+        </div>
+        <div class="panel-body">
+          <div class="actions">
+            <button class="btn green" id="renderBtn">更新预览</button>
+            <button class="btn" id="downloadPngBtn">下载 PNG 图片</button>
+            <button class="btn" id="downloadPdfBtn">下载 PDF</button>
+            <button class="btn secondary" id="copyCaptionBtn">复制 WhatsApp 文字</button>
+            <button class="btn secondary" id="openWhatsAppBtn">打开 WhatsApp</button>
+            <button class="btn secondary" id="printBtn">打印 / 另存 PDF</button>
+          </div>
+          <div class="status" id="status">报告已准备好。</div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="reportCanvas" width="1240" height="1754"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="print-sheet" id="printSheet"></div>
+
+  <script>
+    const HEADERS = [
+      "Submitted At",
+      "Class",
+      "Student Name",
+      "Score",
+      "Stars",
+      "Pattern Count",
+      "Pattern Names",
+      "Highest Red Light Combo",
+      "Sentence Streak",
+      "Flip Matches",
+      "Flip Moves",
+      "Last Mode",
+      "Learning Performance",
+      "Missed Points",
+      "Mistake Details",
+      "Parent Advice",
+      "Report Tags",
+      "Skill Diagnostics",
+      "WhatsApp Report",
+      "WhatsApp Link",
+      "WhatsApp Link Created At",
+      "Source",
+      "Version"
+    ];
+
+    const fields = {
+      className: document.getElementById("className"),
+      studentName: document.getElementById("studentName"),
+      score: document.getElementById("score"),
+      stars: document.getElementById("stars"),
+      patterns: document.getElementById("patterns"),
+      date: document.getElementById("date"),
+      performance: document.getElementById("performance"),
+      misses: document.getElementById("misses"),
+      mistakes: document.getElementById("mistakes"),
+      advice: document.getElementById("advice"),
+      phone: document.getElementById("phone")
+    };
+
+    const canvas = document.getElementById("reportCanvas");
+    const ctx = canvas.getContext("2d");
+    const status = document.getElementById("status");
+
+    function todayText() {
+      return new Date().toLocaleDateString("zh-Hans", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    function getReportData() {
+      return {
+        className: clean(fields.className.value || "Y4"),
+        studentName: clean(fields.studentName.value || "学生"),
+        score: Number(fields.score.value || 0),
+        stars: Number(fields.stars.value || 0),
+        patterns: Number(fields.patterns.value || 0),
+        date: clean(fields.date.value || todayText()),
+        performance: clean(fields.performance.value || "尚未完成挑战，建议先从第一关开始。"),
+        misses: clean(fields.misses.value || "尚未有错题记录，完成挑战后会自动整理。"),
+        mistakes: clean(fields.mistakes.value || "暂时没有明显错题记录。"),
+        advice: clean(fields.advice.value || "建议先玩第一关，熟悉科学格式关键词。"),
+        phone: cleanPhone(fields.phone.value)
+      };
+    }
+
+    function clean(value) {
+      return String(value || "").replace(/\s+/g, " ").trim();
+    }
+
+    function cleanPhone(value) {
+      let phone = String(value || "").replace(/\D/g, "");
+      if (phone.startsWith("0")) phone = `6${phone}`;
+      return phone;
+    }
+
+    function parseDelimited(text) {
+      const line = text.split(/\r?\n/).find((item) => item.trim());
+      if (!line) return [];
+      if (line.includes("\t")) return line.split("\t").map((item) => item.trim());
+      const result = [];
+      let current = "";
+      let quoted = false;
+      for (let i = 0; i < line.length; i += 1) {
+        const char = line[i];
+        if (char === '"' && line[i + 1] === '"') {
+          current += '"';
+          i += 1;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (char === "," && !quoted) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    function parseSheetPaste() {
+      const text = document.getElementById("sheetPaste").value.trim();
+      if (!text) {
+        setStatus("先粘贴一行 Google Sheet 资料。", true);
+        return;
+      }
+
+      const lines = text.split(/\r?\n/).filter((line) => line.trim());
+      let headers = HEADERS;
+      let values = parseDelimited(lines[0]);
+      if (lines.length > 1 && /Student Name|学生|Score|Class/.test(lines[0])) {
+        headers = parseDelimited(lines[0]);
+        values = parseDelimited(lines[1]);
+      }
+
+      const row = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || "";
+      });
+
+      applyRow(row);
+      renderReport();
+      setStatus("已经载入粘贴资料。");
+    }
+
+    function applyRow(row) {
+      fields.className.value = row["Class"] || fields.className.value;
+      fields.studentName.value = row["Student Name"] || fields.studentName.value;
+      fields.score.value = row["Score"] || 0;
+      fields.stars.value = row["Stars"] || 0;
+      fields.patterns.value = row["Pattern Count"] || 0;
+      fields.date.value = normalizeDate(row["Submitted At"]) || fields.date.value || todayText();
+      fields.performance.value = row["Learning Performance"] || fields.performance.value;
+      fields.misses.value = row["Missed Points"] || fields.misses.value;
+      fields.mistakes.value = row["Mistake Details"] || fields.mistakes.value;
+      fields.advice.value = row["Parent Advice"] || fields.advice.value;
+    }
+
+    function normalizeDate(value) {
+      const text = clean(value);
+      if (!text) return "";
+      const date = new Date(text);
+      if (Number.isNaN(date.getTime())) return text;
+      return date.toLocaleDateString("zh-Hans", { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    function drawRoundRect(x, y, w, h, r, fill, stroke = "") {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      if (fill) {
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+
+    function wrapText(text, x, y, maxWidth, lineHeight, maxLines = 999) {
+      const chars = String(text || "").split("");
+      let line = "";
+      let lines = 0;
+      for (let i = 0; i < chars.length; i += 1) {
+        const test = line + chars[i];
+        if (ctx.measureText(test).width > maxWidth && line) {
+          ctx.fillText(line, x, y);
+          y += lineHeight;
+          lines += 1;
+          line = chars[i];
+          if (lines >= maxLines - 1) {
+            const rest = chars.slice(i + 1).join("");
+            let finalLine = line + rest;
+            while (ctx.measureText(`${finalLine}...`).width > maxWidth && finalLine.length > 0) {
+              finalLine = finalLine.slice(0, -1);
+            }
+            ctx.fillText(`${finalLine}...`, x, y);
+            return y + lineHeight;
+          }
+        } else {
+          line = test;
+        }
+      }
+      if (line) {
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+      }
+      return y;
+    }
+
+    function drawSection(title, body, x, y, w, color, maxLines = 5) {
+      drawRoundRect(x, y, w, 210, 18, "#ffffff", "#d7e3e7");
+      ctx.fillStyle = color;
+      ctx.font = "900 28px Arial";
+      ctx.fillText(title, x + 26, y + 44);
+      ctx.fillStyle = "#17262d";
+      ctx.font = "700 25px Arial";
+      wrapText(body, x + 26, y + 84, w - 52, 35, maxLines);
+      return y + 236;
+    }
+
+    function renderReport() {
+      const data = getReportData();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#f5faf8";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#17262d";
+      ctx.fillRect(0, 0, canvas.width, 220);
+      ctx.fillStyle = "#ff477e";
+      ctx.fillRect(0, 0, 18, canvas.height);
+      ctx.fillStyle = "#19a974";
+      ctx.fillRect(18, 0, 10, canvas.height);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 58px Arial";
+      ctx.fillText("Y4 科学格式学习报告", 72, 92);
+      ctx.font = "800 26px Arial";
+      ctx.fillStyle = "#d8e9ee";
+      ctx.fillText("Science Format Practice Summary", 74, 136);
+      ctx.fillText(data.date, 74, 174);
+
+      drawRoundRect(910, 46, 230, 110, 20, "#ffffff");
+      ctx.fillStyle = "#ff477e";
+      ctx.font = "900 34px Arial";
+      ctx.fillText(data.className, 940, 90);
+      ctx.fillStyle = "#17262d";
+      ctx.font = "900 26px Arial";
+      ctx.fillText(data.studentName, 940, 128);
+
+      drawRoundRect(72, 260, 1096, 210, 20, "#ffffff", "#d7e3e7");
+      const metrics = [
+        ["分数", data.score, "#ff477e"],
+        ["星星", data.stars, "#19a974"],
+        ["图案", `${data.patterns}/9`, "#3f7cff"]
+      ];
+      metrics.forEach((metric, index) => {
+        const x = 110 + index * 350;
+        drawRoundRect(x, 304, 290, 120, 16, "#f8fcfb", "#d7e3e7");
+        ctx.fillStyle = "#657b86";
+        ctx.font = "900 24px Arial";
+        ctx.fillText(metric[0], x + 28, 342);
+        ctx.fillStyle = metric[2];
+        ctx.font = "900 48px Arial";
+        ctx.fillText(String(metric[1]), x + 28, 394);
+      });
+
+      let y = 520;
+      y = drawSection("学习表现", data.performance, 72, y, 1096, "#19a974", 5);
+      y = drawSection("需要复习 / Miss 的点", data.misses, 72, y, 1096, "#ff477e", 5);
+      y = drawSection("最近答错细节", data.mistakes, 72, y, 1096, "#3f7cff", 5);
+      y = drawSection("给家长的建议", data.advice, 72, y, 1096, "#9a6a00", 6);
+
+      ctx.fillStyle = "#657b86";
+      ctx.font = "800 22px Arial";
+      wrapText("这份报告根据孩子在 Y4 科学格式小游戏中的练习自动整理。老师可把此图片或 PDF 通过 WhatsApp 发给家长。", 72, 1668, 1096, 30, 2);
+
+      updatePrintSheet(data);
+    }
+
+    function updatePrintSheet(data) {
+      document.getElementById("printSheet").innerHTML = `
+        <div class="print-card">
+          <h2>Y4 科学格式学习报告</h2>
+          <p>${escapeHtml(data.className)} · ${escapeHtml(data.studentName)} · ${escapeHtml(data.date)}</p>
+          <h3>学习表现</h3>
+          <p>${escapeHtml(data.performance)}</p>
+          <h3>需要复习 / Miss 的点</h3>
+          <p>${escapeHtml(data.misses)}</p>
+          <h3>最近答错细节</h3>
+          <p>${escapeHtml(data.mistakes)}</p>
+          <h3>给家长的建议</h3>
+          <p>${escapeHtml(data.advice)}</p>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function downloadPng() {
+      renderReport();
+      const data = getReportData();
+      const link = document.createElement("a");
+      link.download = `${data.className}-${data.studentName}-science-report.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      setStatus("PNG 图片已下载。");
+    }
+
+    function bytesFromString(text) {
+      return new TextEncoder().encode(text);
+    }
+
+    function concatBytes(chunks) {
+      const size = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+      const out = new Uint8Array(size);
+      let offset = 0;
+      chunks.forEach((chunk) => {
+        out.set(chunk, offset);
+        offset += chunk.length;
+      });
+      return out;
+    }
+
+    function dataUrlToBytes(dataUrl) {
+      const binary = atob(dataUrl.split(",")[1]);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    }
+
+    function createPdfFromCanvas() {
+      renderReport();
+      const image = dataUrlToBytes(canvas.toDataURL("image/jpeg", 0.92));
+      const content = "q 595 0 0 842 0 0 cm /Im0 Do Q";
+      const objects = [
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>",
+        `<< /Type /XObject /Subtype /Image /Width ${canvas.width} /Height ${canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.length} >>\nstream\n`,
+        `<< /Length ${content.length} >>\nstream\n${content}\nendstream`
+      ];
+
+      const chunks = [bytesFromString("%PDF-1.4\n")];
+      const offsets = [0];
+      objects.forEach((object, index) => {
+        offsets.push(chunks.reduce((sum, chunk) => sum + chunk.length, 0));
+        chunks.push(bytesFromString(`${index + 1} 0 obj\n`));
+        if (index === 3) {
+          chunks.push(bytesFromString(object));
+          chunks.push(image);
+          chunks.push(bytesFromString("\nendstream\nendobj\n"));
+        } else {
+          chunks.push(bytesFromString(`${object}\nendobj\n`));
+        }
+      });
+      const xrefOffset = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+      let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+      for (let i = 1; i < offsets.length; i += 1) {
+        xref += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+      }
+      xref += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+      chunks.push(bytesFromString(xref));
+      return concatBytes(chunks);
+    }
+
+    function downloadPdf() {
+      const data = getReportData();
+      const pdf = createPdfFromCanvas();
+      const blob = new Blob([pdf], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.download = `${data.className}-${data.studentName}-science-report.pdf`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      setStatus("PDF 已下载。");
+    }
+
+    function buildWhatsAppCaption() {
+      const data = getReportData();
+      return [
+        `Hi Parent / Guardian,`,
+        "",
+        `这是 ${data.className} ${data.studentName} 的 Y4 科学格式学习报告。`,
+        `重点：${data.misses}`,
+        "",
+        "我已附上图片/PDF 报告，里面有学习表现、miss 的点和复习建议。"
+      ].join("\n");
+    }
+
+    async function copyCaption() {
+      const text = buildWhatsAppCaption();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+      setStatus("WhatsApp 文字已复制。");
+    }
+
+    function openWhatsApp() {
+      const data = getReportData();
+      const text = encodeURIComponent(buildWhatsAppCaption());
+      const url = data.phone ? `https://wa.me/${data.phone}?text=${text}` : `https://wa.me/?text=${text}`;
+      window.open(url, "_blank", "noopener");
+      setStatus("已打开 WhatsApp。图片或 PDF 需要你手动附上。");
+    }
+
+    function loadSample() {
+      fields.className.value = "4SC";
+      fields.studentName.value = "Ava";
+      fields.score.value = "168";
+      fields.stars.value = "3";
+      fields.patterns.value = "5";
+      fields.date.value = todayText();
+      fields.performance.value = "专注反应稳定，能连续答对红灯题。能把科学格式词块按正确顺序重组。";
+      fields.misses.value = "需要复习：变数（2 次）、推断（1 次）。";
+      fields.mistakes.value = "变数：选了「不同」，正确是「观察」。推断：选了「上升、下降」，正确是「为什么？」。";
+      fields.advice.value = "用三色笔区分操纵性变数、反应性变数和固定性变数。练习用「为什么？」解释观察到的现象。";
+      renderReport();
+      setStatus("示范资料已载入。");
+    }
+
+    function clearForm() {
+      Object.values(fields).forEach((field) => {
+        if (field.id === "date") field.value = todayText();
+        else if (field.type === "number") field.value = "0";
+        else field.value = "";
+      });
+      fields.className.value = "Y4";
+      fields.studentName.value = "学生";
+      fields.performance.value = "尚未完成挑战，建议先从第一关开始。";
+      fields.misses.value = "尚未有错题记录，完成挑战后会自动整理。";
+      fields.mistakes.value = "暂时没有明显错题记录。";
+      fields.advice.value = "建议先玩第一关，熟悉科学格式关键词。";
+      document.getElementById("sheetPaste").value = "";
+      renderReport();
+      setStatus("表格已清空。");
+    }
+
+    function setStatus(message, error = false) {
+      status.textContent = message;
+      status.style.color = error ? "#e43f5a" : "#19a974";
+    }
+
+    document.getElementById("loadPasteBtn").addEventListener("click", parseSheetPaste);
+    document.getElementById("sampleBtn").addEventListener("click", loadSample);
+    document.getElementById("clearBtn").addEventListener("click", clearForm);
+    document.getElementById("renderBtn").addEventListener("click", renderReport);
+    document.getElementById("downloadPngBtn").addEventListener("click", downloadPng);
+    document.getElementById("downloadPdfBtn").addEventListener("click", downloadPdf);
+    document.getElementById("copyCaptionBtn").addEventListener("click", copyCaption);
+    document.getElementById("openWhatsAppBtn").addEventListener("click", openWhatsApp);
+    document.getElementById("printBtn").addEventListener("click", () => {
+      renderReport();
+      window.print();
+    });
+    Object.values(fields).forEach((field) => field.addEventListener("input", renderReport));
+
+    fields.date.value = todayText();
+    renderReport();
+  </script>
+</body>
+</html>
